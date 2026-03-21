@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # OpenAI
     openai_api_key: Optional[str] = None
 
+    # Anthropic
+    anthropic_api_key: Optional[str] = None
+
     # SendGrid (optional alternative to SMTP)
     sendgrid_api_key: Optional[str] = None
 

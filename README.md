@@ -155,6 +155,29 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
     - Celery task logic and queuing behavior
     - Template file existence and variable validation
   - **Professional email templates**: Responsive HTML templates with inline styling, company branding, payment buttons, and legal compliance footers
+- [x] **Task 3.3**: AI-powered dispute letter drafting
+  - **Dispute letter generator** (`src/ai/dispute_drafter.py`) with support for:
+    - OpenAI GPT-4 Turbo (`gpt-4-turbo-preview`)
+    - Anthropic Claude 3 Opus (`claude-3-opus-20240229`)
+  - **Three letter types**:
+    - `formal_dispute`: Professional payment dispute letter with 14-day deadline
+    - `small_claims_prep`: Court preparation document with case summary and evidence
+    - `demand_letter`: Urgent final demand with 7-day deadline and payment plan option
+  - **Prompt engineering**: Context-aware prompts that include:
+    - Invoice details (number, client, amount, dates, status)
+    - Evidence timeline (communications, payments, attempts)
+    - Legal references and formatting requirements
+    - Output format specification (HTML)
+  - **Cost tracking**: Automatic token counting and USD cost calculation
+    - GPT-4 Turbo: $0.01/1K input + $0.03/1K output
+    - Claude 3 Opus: $0.015/1K input + $0.075/1K output
+  - **Provider fallback**: Configurable preference (OpenAI prioritized if both keys present)
+  - **Comprehensive test suite** (`tests/test_dispute_drafter.py`):
+    - Provider initialization and error handling
+    - Prompt building verification for each letter type
+    - API mocking for both OpenAI and Anthropic
+    - Cost calculation accuracy
+    - Evidence formatting and recipient handling
 
 
 ### Completed Deliverables
@@ -243,7 +266,7 @@ Create a `.env` file from `.env.example` and configure:
 - **Database**: `DATABASE_URL` (PostgreSQL connection string)
 - **JWT**: `SECRET_KEY` for token signing
 - **Payment APIs**: Stripe, PayPal, Plaid credentials
-- **AI**: `OPENAI_API_KEY` for dispute letter generation
+- **AI**: `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY` for dispute letter generation
 - **Email**: SMTP settings for sending follow-ups
 - **Redis**: `REDIS_URL` for Celery task queue
 
