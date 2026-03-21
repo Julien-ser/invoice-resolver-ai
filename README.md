@@ -105,34 +105,47 @@ Set test environment variables in `tests/conftest.py` before running pytest.
 
 ```
 .
-├── README.md              # Project documentation
-├── TASKS.md               # Development task list (track progress)
-├── schema.sql             # PostgreSQL database schema
+├── README.md                    # Project documentation
+├── TASKS.md                     # Development task list (track progress)
+├── schema.sql                   # PostgreSQL database schema
 ├── docs/
 │   └── database-er-diagram.md  # ER diagram and table docs
 ├── .github/
 │   └── workflows/
-│       └── test.yml       # CI pipeline (to be created)
-├── src/                   # Source code (to be created)
-│   ├── api/              # FastAPI endpoints
-│   ├── core/             # Configuration, logging
-│   ├── models/           # SQLAlchemy models
-│   ├── integrations/     # Stripe/PayPal/Plaid clients
-│   ├── email/            # Email automation
-│   ├── ai/               # AI dispute drafter
-│   ├── pdf/              # PDF generator
-│   ├── dashboard/        # Streamlit app
-│   ├── ab_testing/       # A/B testing framework
-│   ├── admin/            # Admin panel
-│   ├── billing/          # Stripe billing
-│   ├── tasks/            # Celery tasks
-│   └── utils/            # Helper functions
-├── tests/                 # Test suite (pytest)
-├── docker-compose.yml     # Local development (PostgreSQL, Redis)
-├── Dockerfile             # API container
-├── Dockerfile.celery      # Celery worker container
-├── pyproject.toml         # Dependencies (Poetry) or requirements.txt
-└── .env.example           # Environment variables template
+│       └── test.yml            # CI pipeline (to be created)
+├── src/                        # Source code
+│   ├── api/                    # FastAPI endpoints
+│   ├── core/                   # Configuration, logging
+│   ├── models/                 # SQLAlchemy models
+│   ├── integrations/           # Stripe/PayPal/Plaid clients
+│   ├── mail/                   # Email automation
+│   ├── ai/                     # AI dispute drafter
+│   ├── pdf/                    # PDF generator
+│   ├── dashboard/              # Streamlit app
+│   ├── ab_testing/             # A/B testing framework
+│   ├── admin/                  # Admin panel
+│   ├── billing/                # Stripe billing
+│   ├── tasks/                  # Celery tasks
+│   └── utils/                  # Helper functions
+├── tests/                      # Test suite (pytest)
+├── docker-compose.yml          # Local development (PostgreSQL, Redis only)
+├── docker-compose.prod.yml     # Full production stack
+├── Dockerfile                  # FastAPI application container (multi-stage)
+├── Dockerfile.celery           # Celery worker/beat container (multi-stage)
+├── requirements.txt            # Python dependencies
+├── secrets/                    # Docker secrets (gitignored, create manually)
+│   ├── postgres_password.txt
+│   ├── jwt_secret.txt
+│   ├── stripe_webhook_secret.txt
+│   ├── paypal_client_secret.txt
+│   ├── openai_api_key.txt
+│   └── redis_password.txt
+├── scripts/
+│   └── init-secrets.sh        # Initialize production secrets
+├── logs/                       # Application logs (mounted volume)
+├── media/                      # Uploaded files (mounted volume)
+├── backups/                    # Database backups (mounted volume)
+└── .env.example                # Environment variables template
 ```
 
 ## Current Progress
@@ -373,18 +386,186 @@ celery -A src.celery_app worker --loglevel=info
 celery -A src.celery_app beat --loglevel=info
 ```
 
-### Configuration
+## Docker Containerization
 
-Create a `.env` file from `.env.example` and configure:
+The application is fully containerized with multi-stage builds for optimized production images.
 
-- **Database**: `DATABASE_URL` (PostgreSQL connection string)
-- **JWT**: `SECRET_KEY` for token signing
-- **Payment APIs**: Stripe, PayPal, Plaid credentials
-- **AI**: `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY` for dispute letter generation
-- **Email**: SMTP settings for sending follow-ups
-- **Redis**: `REDIS_URL` for Celery task queue
+### Architecture
 
-See `.env.example` for all available options.
+- **FastAPI Application** (`Dockerfile`): Multi-stage build with Python 3.12, non-root user, health checks
+- **Celery Worker** (`Dockerfile.celery`): Separate container for background tasks
+- **Celery Beat** (`Dockerfile.celery`): Scheduler for periodic tasks
+- **PostgreSQL**: With pg_stat_statements for query performance monitoring
+- **Redis**: With password protection and memory limits
+
+### Development (Docker Compose)
+
+```bash
+# Start only database and Redis (app runs locally)
+docker-compose up -d postgres redis
+
+# View logs
+docker-compose logs -f postgres redis
+
+# Stop services
+docker-compose down
+```
+
+### Production Deployment
+
+Production uses `docker-compose.prod.yml` with Docker secrets for sensitive data and enhanced security.
+
+#### 1. Initialize Secrets
+
+```bash
+# Run the initialization script
+chmod +x scripts/init-secrets.sh
+./scripts/init-secrets.sh
+
+# Manually edit the generated secrets and add your actual API keys
+# - secrets/openai_api_key.txt
+# - secrets/paypal_client_secret.txt (if using PayPal)
+```
+
+#### 2. Configure Environment
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your production settings:
+# - DEBUG=false
+# - LOG_LEVEL=INFO
+# - WORKERS=4
+# - API_PORT=8000
+# - Any other non-secret configuration
+```
+
+#### 3. Start Production Stack
+
+```bash
+# Start all services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs for all services
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Check service status
+docker-compose -f docker-compose.prod.yml ps
+
+# Stop all services
+docker-compose -f docker-compose.prod.yml down
+```
+
+#### 4. Access the Application
+
+- API: http://localhost:8000 (or your server IP)
+- Docs: http://localhost:8000/docs
+- Health check: http://localhost:8000/health
+
+#### 5. Production Management
+
+```bash
+# Restart a specific service
+docker-compose -f docker-compose.prod.yml restart api
+
+# View logs for a specific service
+docker-compose -f docker-compose.prod.yml logs -f api
+
+# Execute a command in a container
+docker-compose -f docker-compose.prod.yml exec api python -c "import sys; print(sys.version)"
+
+# Stop and remove everything (including volumes - CAREFUL!)
+docker-compose -f docker-compose.prod.yml down -v
+```
+
+### Secrets Management
+
+Production uses Docker secrets to securely inject sensitive data:
+
+**Secret Files** (in `./secrets/`):
+- `postgres_password.txt` - PostgreSQL database password
+- `jwt_secret.txt` - JWT signing key (min 64 characters)
+- `stripe_webhook_secret.txt` - Stripe webhook signing secret
+- `paypal_client_secret.txt` - PayPal REST API secret
+- `openai_api_key.txt` - OpenAI API key
+- `redis_password.txt` - Redis authentication password
+
+**Important**: The `secrets/` directory is gitignored. Never commit actual secrets to version control.
+
+To rotate a secret:
+1. Generate a new value
+2. Update the corresponding file in `secrets/`
+3. Restart affected services: `docker-compose -f docker-compose.prod.yml restart`
+
+### Security Features
+
+- **Non-root containers**: All services run as UID 1001 (invoice user)
+- **Resource limits**: CPU and memory constraints on each service
+- **Health checks**: Automatic container restart on failure
+- **Secrets isolation**: Sensitive data mounted as read-only files
+- **Network isolation**: Dedicated Docker bridge network
+- **Automatic restarts**: All services use `restart: always`
+
+### Backup and Recovery
+
+**Database Backup**:
+```bash
+# Create a backup
+docker-compose -f docker-compose.prod.yml exec postgres pg_dump -U postgres invoice_resolver > backups/backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restore from backup
+docker-compose -f docker-compose.prod.yml exec -T postgres psql -U postgres invoice_resolver < backups/backup_20260321_120000.sql
+```
+
+Backups are automatically saved to `./backups/` directory (mounted to `/backups` in container).
+
+### Monitoring
+
+**System Health**:
+- FastAPI health endpoint: `GET /health`
+- Celery worker status: `docker-compose -f docker-compose.prod.yml logs celery-worker`
+- Redis connection: `docker-compose -f docker-compose.prod.yml exec redis redis-cli ping`
+
+**Logs**: All service logs are mounted to `./logs/` directory for persistence.
+
+### Troubleshooting
+
+**Services won't start**:
+- Check secrets directory exists and files are readable: `ls -la secrets/`
+- Verify no port conflicts: `netstat -tulpn | grep :8000`
+- Check logs: `docker-compose -f docker-compose.prod.yml logs`
+
+**Database connection errors**:
+- Ensure PostgreSQL is healthy: `docker-compose -f docker-compose.prod.yml ps postgres`
+- Verify DATABASE_URL in `.env` matches credentials
+
+**Celery tasks not running**:
+- Check Redis connectivity: `docker-compose -f docker-compose.prod.yml exec celery-worker celery -A src.celery_app:celery_app inspect ping`
+- Verify worker logs for errors
+
+### Multi-stage Build Optimization
+
+The Dockerfiles use multi-stage builds to keep production images small:
+
+1. **Builder stage**: Installs dependencies to a virtual environment
+2. **Final stage**: Copies only the virtual environment and application code
+3. **Result**: Final image contains only runtime dependencies, no build tools
+
+Typical image sizes:
+- FastAPI: ~180MB (vs ~500MB for single-stage)
+- Celery worker: ~160MB
+
+### CI/CD
+
+GitHub Actions workflow runs tests on every push to main/develop branches. Production deployment can be automated with additional workflows for:
+- Docker image build and push to registry
+- Database migrations
+- Zero-downtime deployment with health checks
+
+## License
+
+To be determined.
 
 ### Project Structure
 
@@ -474,11 +655,40 @@ To be documented once implemented (after Task 1.2).
 
 ## Testing
 
-Test suite will be implemented in Phase 5 using pytest with >80% coverage.
+Comprehensive test suite with >80% coverage using pytest.
 
 ```bash
+# Run tests locally
 pytest tests/ -v --cov=src --cov-report=html
+
+# Run with coverage report
+pytest tests/ -v --cov=src --cov-report=term-missing
+
+# Run specific test file
+pytest tests/test_email.py -v
 ```
+
+### Test Coverage
+
+The test suite includes:
+
+- **Unit tests** for all services (email, AI, PDF) with mocked external APIs
+- **Integration tests** for API endpoints using FastAPI TestClient
+- **Database fixtures** with SQLite in-memory for isolated testing
+- **Coverage reporting** with pytest-cov
+
+### CI/CD
+
+GitHub Actions automatically runs tests on every push and pull request across Python 3.11 and 3.12.
+
+Key features:
+- PostgreSQL service for realistic testing
+- System dependencies installed for PDF generation (WeasyPrint)
+- Ruff linting and Pyright type checking
+- Security scanning with TruffleHog
+- Artifact upload of coverage reports
+
+See `.github/workflows/test.yml` for the full pipeline.
 
 ## Deployment
 

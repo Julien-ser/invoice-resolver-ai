@@ -1,0 +1,50 @@
+# Git
+.git
+.github
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+*.egg-info
+dist
+build
+
+# Testing & Coverage
+.pytest_cache
+.coverage
+.coverage.*
+htmlcov
+*.cover
+*.log
+.tox
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Project specific
+logs/
+media/
+backups/
+secrets/
+alembic/versions/*.pyc
+
+# Documentation (optional - uncomment if you don't need docs in image)
+# docs/
+
+# Tests (optional - uncomment if you don't need tests in image)
+# tests/
+
+# Misc
+.DS_Store
+*.sqlite

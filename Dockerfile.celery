@@ -1,0 +1,47 @@
+# Multi-stage build for Celery worker
+FROM python:3.12-slim AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy dependency files
+COPY requirements.txt .
+
+# Install dependencies to a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# Final stage
+FROM python:3.12-slim
+
+# Create non-root user
+RUN addgroup --system --gid 1001 invoice && \
+    adduser --system --uid 1001 --gid 1001 invoice
+
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy application code
+COPY --chown=invoice:invoice ./src /app/src
+COPY --chown=invoice:invoice alembic.ini /app/alembic.ini
+COPY --chown=invoice:invoice alembic /app/alembic
+
+# Create necessary directories with correct permissions
+RUN mkdir -p /app/logs /app/media && \
+    chown -R invoice:invoice /app
+
+# Switch to non-root user
+USER invoice
+
+# Command to run Celery worker
+CMD ["celery", "-A", "src.celery_app:celery_app", "worker", "--loglevel=info"]
