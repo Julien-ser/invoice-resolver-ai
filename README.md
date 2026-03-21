@@ -89,8 +89,14 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
   - Main FastAPI application (`src/main.py`) with health check and CORS
   - Dependencies in `requirements.txt`: fastapi, uvicorn, sqlalchemy, psycopg2-binary, pydantic, python-dotenv, bcrypt, python-jose, passlib
   - Environment variable template (`.env.example`)
-- [ ] Task 1.3: PostgreSQL setup with SQLAlchemy + Alembic
-- [ ] Task 1.4: API documentation outline
+- [ ] **Task 1.3**: PostgreSQL setup with SQLAlchemy + Alembic
+- [x] **Task 1.4**: API documentation outline
+  - Comprehensive OpenAPI specs defined
+  - Complete endpoint reference with request/response schemas
+  - Authentication flow details (JWT)
+  - Webhook payload examples (Stripe, PayPal, Plaid)
+  - Error codes, rate limiting, pagination standards
+  - Detailed API documentation in `docs/api.md`
 
 ### Completed Deliverables
 
