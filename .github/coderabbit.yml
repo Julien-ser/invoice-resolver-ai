@@ -1,0 +1,34 @@
+# CodeRabbit AI Review Configuration
+# See: https://coderabbit.ai/documentation
+
+reviews:
+  profile: "thorough"
+  auto_merge: true
+  auto_review: true
+  review_timeout_hours: 24
+
+rules:
+  - name: "security"
+    description: "Flag potential security vulnerabilities"
+    enabled: true
+  - name: "performance"
+    description: "Identify performance bottlenecks"
+    enabled: true
+  - name: "style"
+    description: "Enforce code style and conventions"
+    enabled: true
+
+messages:
+  title: "AI Review by CodeRabbit"
+  body: |
+    This PR has been reviewed by CodeRabbit AI.
+    Check the comments for suggestions.
+
+included_paths:
+  - "src/**"
+  - "lib/**"
+  - "!**/*.test.ts"
+  - "!**/*.spec.ts"
+
+labels:
+  - "ai-reviewed"
