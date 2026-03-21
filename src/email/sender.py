@@ -17,7 +17,8 @@ from sqlalchemy import func
 
 from ..core.config import settings
 from ..core.database import get_session
-from ..models import Template, Campaign, EmailEvent, User, Invoice
+from ..models import Template, Campaign, EmailEvent, User, Invoice, ABTest
+from ..ab_testing.experiment import ExperimentManager
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +220,46 @@ def send_followup_email(
             logger.error(f"Template {template_type} not found for user {user.id}")
             return None
 
-        # Render template
+        # Create campaign record before sending (we need campaign.id for tracking)
+        campaign = Campaign(
+            user_id=user.id,
+            template_id=template.id,
+            invoice_id=invoice.id,
+            scheduled_send_at=db.execute(select(func.now())).scalar(),
+        )
+        db.add(campaign)
+        db.flush()  # Get campaign ID
+
+        # Assign A/B testing variant if there are active template experiments for this user
+        manager = ExperimentManager(db)
+        active_experiments = (
+            db.query(ABTest)
+            .filter(
+                ABTest.user_id == user.id,
+                ABTest.is_active == True,
+                ABTest.test_type == "template",
+            )
+            .all()
+        )
+        if active_experiments:
+            # Use the most recent active experiment (could be enhanced for multiple concurrent experiments)
+            experiment = active_experiments[0]
+            variant = manager.assign_variant(
+                experiment_id=experiment.id,
+                user_id=user.id,
+                campaign_id=campaign.id,
+            )
+            if variant:
+                campaign.ab_test_variant = variant
+                db.add(campaign)
+        # If no active experiment, campaign.ab_test_variant remains None
+
+        # Compute tracking pixel URL for email open tracking
+        tracking_pixel_url = (
+            f"{settings.api_base_url}/api/ab-tests/track/open/{campaign.id}"
+        )
+
+        # Render template with tracking pixel
         renderer = EmailTemplateRenderer()
         days_overdue = 0
         if invoice.status == "overdue" and invoice.due_date:
@@ -237,18 +277,9 @@ def send_followup_email(
                 else "",
                 "invoice_number": invoice.invoice_number or "N/A",
                 "days_overdue": days_overdue,
+                "tracking_pixel_url": tracking_pixel_url,
             },
         )
-
-        # Create campaign record before sending
-        campaign = Campaign(
-            user_id=user.id,
-            template_id=template.id,
-            invoice_id=invoice.id,
-            scheduled_send_at=db.execute(select(func.now())).scalar(),
-        )
-        db.add(campaign)
-        db.flush()  # Get campaign ID
 
         # Send email
         if sender is None:

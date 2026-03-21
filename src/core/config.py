@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     smtp_password: Optional[str] = None
     email_from: Optional[str] = None
 
+    # API
+    api_base_url: str = "http://localhost:8000"
+
     # Redis (Celery)
     redis_url: str = "redis://localhost:6379/0"
 

@@ -74,10 +74,15 @@
         {{ user.email }}</p>
     </div>
 
-    <div class="footer">
-        <p>This is an automated final notice. You received this email because you have an outstanding overdue invoice with {{ user.company_name or user.full_name }}.</p>
-        <p>If you believe this is an error, please contact us immediately at {{ user.email }}</p>
-        <p><em>This notice serves as our final attempt to resolve this matter voluntarily before escalating to formal dispute proceedings.</em></p>
-    </div>
-</body>
+     <div class="footer">
+         <p>This is an automated final notice. You received this email because you have an outstanding overdue invoice with {{ user.company_name or user.full_name }}.</p>
+         <p>If you believe this is an error, please contact us immediately at {{ user.email }}</p>
+         <p><em>This notice serves as our final attempt to resolve this matter voluntarily before escalating to formal dispute proceedings.</em></p>
+     </div>
+
+     <!-- Email tracking pixel -->
+     {% if tracking_pixel_url %}
+     <img src="{{ tracking_pixel_url }}" width="1" height="1" alt="" style="display:none;position:absolute;top:0;left:0;">
+     {% endif %}
+ </body>
 </html>

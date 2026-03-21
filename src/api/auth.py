@@ -17,6 +17,7 @@ from pydantic import BaseModel, EmailStr, Field
 from src.core.config import settings
 from src.core.database import get_session
 from src.models import User, RefreshToken as RefreshTokenModel
+from src.api.deps import get_current_user
 
 # Create database session dependency
 db_gen = get_session()
@@ -62,6 +63,7 @@ class UserResponse(BaseModel):
     subscription_tier: str
     invoice_limit: int
     is_active: bool
+    is_admin: bool = False
     created_at: datetime
 
     class Config:
@@ -354,3 +356,15 @@ async def logout(refresh_token: str):
         )
 
     return {"message": "Logged out successfully"}
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get current user's information.
+
+    Returns user details including subscription tier, limits, and admin status.
+    """
+    return current_user

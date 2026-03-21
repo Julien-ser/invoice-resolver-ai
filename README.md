@@ -231,11 +231,25 @@ streamlit run dashboard/app.py
 
 Access the dashboard at http://localhost:8501. Login with credentials you created via the registration API at http://localhost:8000/api/auth/register.
 
+**Admin Access:**
+By default, registered users are not admins. To grant admin privileges:
+1. Set `is_admin=true` in the database for the user, OR
+2. Extend the registration endpoint to accept an admin flag (for initial setup)
+
+Admin users will see an additional "🛡️ Admin" menu in the sidebar with full system management capabilities.
+
 **Dashboard Features:**
 - **Overview**: View KPIs (total invoices, recovery rate, overdue count)
 - **Invoices**: Browse and filter invoices, update status inline
 - **Campaigns**: Track email campaign performance and A/B test results
 - **Settings**: Manage payment connections (Stripe, PayPal, Plaid)
+
+**Admin Dashboard** (Admin users only):
+- **Dashboard**: System overview with user counts, invoice stats, connection stats
+- **Users**: View all users, search/filter by tier/status, update subscription tiers
+- **Metrics**: System health monitoring including Celery workers, API latency, errors
+- **Webhooks**: View recent webhook events with filtering by provider/status
+- **Connections**: See all payment provider connections across users
 
 
 ### Prerequisites
