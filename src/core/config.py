@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Anthropic
     anthropic_api_key: Optional[str] = None
 
+    # Sentry (error monitoring)
+    sentry_dsn: Optional[str] = None
+
     # SendGrid (optional alternative to SMTP)
     sendgrid_api_key: Optional[str] = None
 

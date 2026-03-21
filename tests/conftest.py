@@ -13,8 +13,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
-# Set test environment variables BEFORE importing app
-# These are needed because billing module loads PLANS at import time
+# Set test environment variables BEFORE importing any src modules
+# This is critical because database engine is created at module import time
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("STRIPE_API_KEY", "sk_test_123")
 os.environ.setdefault("STRIPE_PRICE_PRO", "price_pro_123")
 os.environ.setdefault("STRIPE_PRICE_FREE", "price_free_123")

@@ -31,11 +31,15 @@ generate_secret "stripe_webhook_secret.txt" 32
 generate_secret "paypal_client_secret.txt" 32
 generate_secret "openai_api_key.txt"  # You'll need to set this manually
 generate_secret "redis_password.txt" 32
+generate_secret "grafana_admin_password.txt" 32
 
 echo ""
 echo "⚠️  IMPORTANT: You must manually set the following secrets:"
 echo "   - secrets/openai_api_key.txt (your actual OpenAI API key)"
 echo "   - secrets/paypal_client_secret.txt (if using PayPal)"
+echo ""
+echo "You can change the generated Grafana admin password in:"
+echo "   secrets/grafana_admin_password.txt"
 echo ""
 echo "Copy .env.example to .env and fill in non-secret environment variables:"
 echo "   cp .env.example .env"

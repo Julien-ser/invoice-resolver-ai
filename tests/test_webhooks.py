@@ -15,12 +15,14 @@ import hashlib
 from datetime import datetime
 from typing import Dict, Any
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
 
 from src.core.config import Settings
-from src.core.database import engine, get_session
+from src.core.database import get_session
 from src.models import Base, User, Invoice, PaymentConnection
 from src.main import app
-from tests.conftest import TestingSessionLocal
 
 # Override settings for testing
 test_settings = Settings()

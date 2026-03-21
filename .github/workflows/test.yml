@@ -12,9 +12,27 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.11', '3.12']
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: invoice_resolver_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -38,7 +56,31 @@ jobs:
         pyright . || true
       continue-on-error: true
     
+    - name: Wait for PostgreSQL
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invoice_resolver_test
+      run: |
+        python - <<'EOF'
+        import os, time, psycopg
+        url = os.getenv('DATABASE_URL')
+        start = time.time()
+        while time.time() - start < 30:
+            try:
+                conn = psycopg.connect(url, connect_timeout=2)
+                conn.close()
+                print("PostgreSQL is ready")
+                break
+            except Exception as e:
+                print(f"Waiting for PostgreSQL... ({e})")
+                time.sleep(1)
+        else:
+            print("Timeout waiting for PostgreSQL")
+            exit(1)
+        EOF
+    
     - name: Run tests
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/invoice_resolver_test
       run: |
         if [ -d tests ]; then
           pip install pytest pytest-cov

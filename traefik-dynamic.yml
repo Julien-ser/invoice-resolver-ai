@@ -1,0 +1,77 @@
+# Traefik dynamic configuration
+# Contains middleware and additional router definitions
+
+http:
+  middlewares:
+    # Secure headers middleware
+    secure-headers:
+      headers:
+        browserXSSFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customFrameOptionsValue: "SAMEORIGIN"
+
+    # Rate limiting middleware (100 requests per minute)
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+
+    # Compress responses
+    compress:
+      compress: {}
+
+    # Authentication for Traefik dashboard
+    auth:
+      basicAuth:
+        users:
+          - "admin:${TRAEFIK_ADMIN_HASH}"  # Generate with: htpasswd -nb admin password
+
+  routers:
+    # API router
+    api:
+      rule: "Host(`api.${DOMAIN:-localhost}`)"
+      service: api
+      entryPoints:
+        - websecure
+      middlewares:
+        - secure-headers
+        - rate-limit
+      tls:
+        certResolver: le
+
+    # Dashboard router
+    dashboard:
+      rule: "Host(`dashboard.${DOMAIN:-localhost}`)"
+      service: streamlit
+      entryPoints:
+        - websecure
+      middlewares:
+        - secure-headers
+        - rate-limit
+      tls:
+        certResolver: le
+
+  services:
+    # FastAPI backend service
+    api:
+      loadBalancer:
+        servers:
+          - url: "http://api:8000"
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 5s
+
+    # Streamlit dashboard service
+    streamlit:
+      loadBalancer:
+        servers:
+          - url: "http://dashboard:8501"
+        healthCheck:
+          path: /_stcore/health
+          interval: 10s
+          timeout: 5s

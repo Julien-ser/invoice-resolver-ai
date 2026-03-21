@@ -1,0 +1,87 @@
+# Fly.io deployment configuration for Invoice Resolver AI
+# See https://fly.io/docs/leges/ for full reference
+
+app = "invoice-resolver-ai"
+primary_region = "ord"  # Chicago region - adjust as needed
+
+# Build configuration - uses existing Dockerfile
+[build]
+  dockerfile = "Dockerfile"
+
+# HTTP endpoint - automatically gets HTTPS SSL certificate
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  process_type = "web"
+
+  # Health check
+  health_check {
+    path = "/health"
+    interval = "10s"
+    timeout = "5s"
+    grace_period = "30s"
+  }
+
+  # Environment variables (secrets set via `fly secrets set`)
+  env = {
+    LOG_LEVEL = "INFO"
+    DEBUG = "false"
+    WORKERS = "4"
+  }
+
+# Celery worker service (background tasks)
+[[services]]
+  process_type = "worker"
+  command = ["celery", "-A", "src.celery_app:celery_app", "worker", "--loglevel=info"]
+
+  [[services.ports]]
+    port = 8080
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 8081
+    handlers = ["tcp"]
+
+  [[services.tcp_checks]]
+    interval = "10s"
+    timeout = "5s"
+    grace_period = "30s"
+
+  env = {
+    LOG_LEVEL = "INFO"
+  }
+
+# Celery beat scheduler (periodic tasks)
+[[services]]
+  process_type = "beat"
+  command = ["celery", "-A", "src.celery_app:celery_app", "beat", "--loglevel=info"]
+
+  [[services.ports]]
+    port = 8082
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 8083
+    handlers = ["tcp"]
+
+  [[services.tcp_checks]]
+    interval = "10s"
+    timeout = "5s"
+    grace_period = "30s"
+
+  env = {
+    LOG_LEVEL = "INFO"
+  }
+
+# Volume for media/uploads (if needed for PDF storage)
+#[mounts]
+#  source = "media"
+#  destination = "/app/media"
+
+# Backup volume for database backups
+#[mounts]
+#  source = "backups"
+#  destination = "/app/backups"

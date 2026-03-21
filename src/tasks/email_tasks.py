@@ -15,7 +15,7 @@ from ..celery_app import celery_app
 from ..core.database import get_session
 from ..core.config import settings
 from ..models import Invoice, User, Template, Campaign
-from .sender import send_followup_email, get_email_sender
+from ..mail.sender import send_followup_email, get_email_sender
 
 logger = logging.getLogger(__name__)
 

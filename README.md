@@ -692,7 +692,317 @@ See `.github/workflows/test.yml` for the full pipeline.
 
 ## Deployment
 
-Production deployment instructions will be added in Phase 5 (Docker, cloud hosting, CI/CD).
+Invoice Resolver AI supports multiple deployment options with full CI/CD, SSL, automated backups, and monitoring.
+
+### Quick Deploy (Recommended)
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/yourusername/invoice-resolver-ai.git
+cd invoice-resolver-ai
+./scripts/init-secrets.sh
+cp .env.example .env
+# Edit .env with your API keys and domain names
+
+# 2. Deploy to production (Docker Compose + Traefik)
+./deploy.sh --production
+```
+
+That's it! The deploy script handles everything: builds, starts services, runs migrations, and verifies health.
+
+### Deployment Options
+
+#### Option 1: Docker Compose with Traefik (Self-Hosted)
+
+**Best for**: Full control on your own VPS (Ubuntu 22.04+)
+
+- Automatic SSL via Let's Encrypt
+- Traefik reverse proxy with rate limiting
+- Docker secrets for credential management
+- Includes monitoring stack (Prometheus + Grafana)
+
+**Setup**:
+
+```bash
+# Initialize secrets
+./scripts/init-secrets.sh
+
+# Edit configuration
+cp .env.example .env
+nano .env  # Set API_DOMAIN, DASHBOARD_DOMAIN, SSL_EMAIL, etc.
+
+# Deploy
+./deploy.sh --production
+
+# Or deploy with monitoring stack:
+docker-compose -f docker-compose.prod.yml -f docker-compose.traefik.yml -f docker-compose.monitoring.yml up -d
+```
+
+**Services**:
+- API: `https://api.yourdomain.com:8000` (behind Traefik)
+- Dashboard: `https://dashboard.yourdomain.com:8501`
+- Prometheus: `https://prometheus.yourdomain.com:9090`
+- Grafana: `https://grafana.yourdomain.com:3000` (admin password in `secrets/grafana_admin_password.txt`)
+
+**Updating**:
+```bash
+git pull origin main
+./deploy.sh --production --no-build  # Rebuild anyway if code changed
+```
+
+#### Option 2: Fly.io (Platform-as-a-Service)
+
+**Best for**: Quick global deployment with minimal ops
+
+- Automatic SSL certificates
+- Global edge network
+- Free tier available
+- No server management
+
+**Setup**:
+
+```bash
+# Install flyctl
+curl -L https://fly.io/install.sh | sh
+flyctl login
+
+# Launch app (if first time)
+flyctl launch invoice-resolver-ai --org personal --region ord --no-deploy
+
+# Set secrets
+flyctl secrets set \
+  POSTGRES_PASSWORD=$(openssl rand -base64 32) \
+  JWT_SECRET_KEY=$(openssl rand -base64 64) \
+  REDIS_PASSWORD=$(openssl rand -base64 32) \
+  STRIPE_WEBHOOK_SECRET=whsec_... \
+  OPENAI_API_KEY=sk-... \
+  DATABASE_URL=postgresql://...  # Use Fly's Postgres or external
+
+# Deploy
+flyctl deploy --remote-only
+
+# Run migrations
+flyctl ssh console -C "alembic upgrade head"
+```
+
+**Note**: Fly.io requires external Redis/PostgreSQL or use Fly's managed services. Redis can run on same VM; use Postgres for production.
+
+#### Option 3: AWS ECS / Kubernetes
+
+For large-scale deployments, adapt Docker images to your orchestrator. The application is cloud-agnostic.
+
+---
+
+### Monitoring & Observability
+
+#### Sentry (Error Tracking)
+
+Sentry is built-in. To enable:
+
+1. Create project at https://sentry.io/new
+2. Add DSN to `.env`: `SENTRY_DSN=https://public_key@host/project_id`
+3. Redeploy
+
+Sentry automatically captures:
+- Unhandled exceptions
+- Performance traces (with sampling)
+- Celery task failures
+
+Configure alerts in Sentry dashboard for new issues, error spikes, and user impact.
+
+#### Prometheus Metrics
+
+Metrics endpoint: `GET /metrics` (Prometheus format)
+
+**Metrics collected**:
+- HTTP request count by method, path, status code
+- Request duration histograms (p50, p95, p99)
+- Application uptime (via health checks)
+
+**Deploy monitoring stack**:
+
+```bash
+docker-compose -f docker-compose.prod.yml -f docker-compose.traefik.yml -f docker-compose.monitoring.yml up -d
+```
+
+Grafana dashboards are pre-configured in `grafana/provisioning/`. Access Grafana at `https://grafana.yourdomain.com` (admin password in secrets).
+
+**Metrics to alert on**:
+- `http_requests_total{status_code=~"5.."}` > 10/min (error rate)
+- `http_request_duration_seconds{quantile="0.99"}` > 2s (latency SLA)
+- `up{job="invoice-resolver-api"}` == 0 (service down)
+
+#### Health Checks
+
+All services expose health endpoints for load balancers:
+- API: `/health` → `{"status": "healthy", "service": "Invoice Resolver AI"}`
+- Dashboard: `/_stcore/health` (Streamlit)
+- Celery: `celery -A src.celery_app inspect ping`
+
+---
+
+### Automated Backups
+
+Database backups are automated via Celery Beat daily at 2 AM UTC.
+
+**Backup retention**: 30 days (configurable in `src/tasks/backup.py`)
+
+**Backup location**: `./backups/` directory (persisted volume)
+
+**Manual backup**:
+```bash
+./deploy.sh --backup  # Creates backup before deploying
+# Or trigger task directly:
+docker-compose -f docker-compose.prod.yml exec celery-worker celery -A src.celery_app:celery_app call tasks.backup.run_backup
+```
+
+**Restore from backup**:
+```bash
+# List backups
+ls -lh backups/
+
+# Restore (overwrites current data!)
+docker-compose -f docker-compose.prod.yml exec celery-worker python -c "
+from tasks.backup import run_restore
+run_restore('backups/backup_20260321_020000.sql.gz')
+"
+```
+
+**Offsite backups** (recommended for production):
+```bash
+# Sync to S3 daily (add to crontab or use GitHub Action)
+aws s3 sync ./backups/ s3://your-bucket/invoice-resolver-backups/ --delete
+
+# Or use rclone for other cloud providers
+rclone sync backups/ remote:backup-bucket/invoice-resolver/ --progress
+```
+
+---
+
+### CI/CD Pipeline
+
+GitHub Actions workflows automate testing and deployment:
+
+**Workflows**:
+- `.github/workflows/test.yml` - Runs tests on every push (Python 3.11 & 3.12), linting, security scanning
+- `.github/workflows/deploy-staging.yml` - Auto-deploys to staging on `develop` branch
+- `.github/workflows/deploy-production.yml` - Manual production deployment with approval
+
+**CI Checks**:
+- ✅ Unit tests (>80% coverage target)
+- ✅ Integration tests with real PostgreSQL
+- ✅ Ruff linting + Pyright type checking
+- ✅ TruffleHog secret scanning
+- ✅ System dependency verification (for PDF generation)
+
+**Deployment Workflow**:
+
+1. Push to `develop` → Auto-deploys to staging
+2. Create PR to `main` → CI runs full test suite
+3. Merge to `main` → Manual production deployment via GitHub Actions UI
+4. Production deployment requires admin approval and allows canary releases
+
+**Customizing CI/CD**: Edit workflow files in `.github/workflows/`. The deploy workflows are flexible and can be adapted for Heroku, AWS, or custom scripts.
+
+---
+
+### SSL/TLS
+
+SSL is automatically handled:
+
+- **Traefik** (Docker Compose): Uses Let's Encrypt ACME challenge. Certificates auto-renew.
+- **Fly.io**: Built-in SSL via `https://` enforced. No configuration needed.
+- **Custom load balancer**: Upload your certificates or use ACME provider.
+
+Ensure ports 80 and 443 are open in firewall for Let's Encrypt validation.
+
+---
+
+### Security Best Practices
+
+1. **Use strong secrets**: Run `scripts/init-secrets.sh` to generate cryptographically secure passwords
+2. **Never commit secrets**: All secrets go in `secrets/` (gitignored) and `.env` (gitignored)
+3. **Rotate regularly**: Change JWT_SECRET_KEY, API keys quarterly
+4. **Enable firewall**: Only expose ports 80, 443, and SSH (if needed)
+5. **Use non-root containers**: Docker images run as UID 1001 (enforced in Dockerfile)
+6. **Database security**: Enable RLS policies (in schema.sql), use strong database passwords
+7. **Monitor with Sentry**: Capture and alert on suspicious activity
+8. **Keep updated**: Regularly update base images and dependencies
+
+---
+
+### Scaling
+
+**Vertical Scale** (bigger server):
+- Increase CPU/memory limits in `docker-compose.prod.yml` under `deploy.resources`
+- Ensure server has sufficient resources
+
+**Horizontal Scale** (more instances):
+- API: Set `WORKERS` in `.env` (Gunicorn workers)
+- Celery: `docker-compose up --scale celery-worker=3`
+- Load balancer required (Traefik already load balances)
+
+**Database Scale**:
+- Use managed PostgreSQL (RDS, CloudSQL, Fly Postgres) for production
+- Enable connection pooling (PgBouncer)
+- Add read replicas for heavy read loads
+
+**Redis Scale**:
+- Use managed Redis (ElastiCache, Upstash) for high availability
+- Enable Redis persistence (AOF/RDB)
+
+---
+
+### Troubleshooting Deployment
+
+**Services fail to start**:
+```bash
+# Check logs
+docker-compose -f docker-compose.prod.yml logs <service>
+
+# Common issues:
+# - Missing secrets: ls -la secrets/
+# - Port conflicts: sudo netstat -tulpn | grep :80
+# - Out of disk space: df -h
+```
+
+**SSL certificates not obtained**:
+```bash
+# Check Traefik logs
+docker-compose -f docker-compose.traefik.yml logs traefik | grep -i acme
+
+# Ensure DNS A record points to server IP
+# Wait 30s and retry: docker-compose -f docker-compose.traefik.yml restart traefik
+```
+
+**Database migrations fail**:
+```bash
+# Check migration history
+docker-compose -f docker-compose.prod.yml exec api alembic history
+
+# Manually apply problematic migration with --sql output review first
+docker-compose -f docker-compose.prod.yml exec api alembic upgrade head
+```
+
+**High memory usage**:
+```bash
+# Check container stats
+docker stats
+
+# Adjust memory limits in docker-compose.prod.yml
+# For Celery workers, increase from 256M to 512M if needed
+```
+
+**Metrics not showing in Prometheus**:
+```bash
+# Verify /metrics endpoint is accessible
+curl http://localhost:8000/metrics | head
+
+# Check Prometheus targets: https://prometheus.yourdomain.com/targets
+# API target should show "UP"
+```
+
+See [docs/deployment-runbook.md](./docs/deployment-runbook.md) for comprehensive troubleshooting guide.
 
 ## License
 

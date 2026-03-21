@@ -6,7 +6,7 @@ psycopg[binary]==3.3.3
 pydantic==2.11.0
 pydantic-settings==2.1.0
 python-dotenv==1.0.0
-bcrypt==4.1.2
+bcrypt==4.0.1
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 
@@ -15,8 +15,8 @@ alembic==1.13.1
 
 # Payment providers
 stripe==9.0.0
-paypalrestsdk==2.0.0
-plaid-python==11.0.0
+paypalrestsdk==1.13.2
+plaid-python==9.0.0
 
 # Testing
 # Testing
@@ -42,3 +42,7 @@ streamlit==1.29.0
 streamlit-authenticator==0.2.3
 plotly==5.18.0
 pandas==2.2.1
+
+# Monitoring
+prometheus-client==0.20.0
+sentry-sdk[fastapi]==1.40.0

@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
 
 import stripe
-from stripe.error import (
+from stripe import (
     StripeError as StripeLibError,
     RateLimitError,
     AuthenticationError,

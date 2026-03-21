@@ -8,14 +8,14 @@ for invoice status synchronization and other background operations.
 import os
 from celery import Celery
 from celery.schedules import crontab
-from core.config import settings
+from .core.config import settings
 
 # Create Celery app
 celery_app = Celery(
     "invoice_resolver",
     broker=settings.redis_url,
     backend=settings.redis_url,
-    include=["tasks.sync"],
+    include=["tasks.sync", "tasks.backup"],
 )
 
 # Celery configuration
@@ -32,6 +32,10 @@ celery_app.conf.update(
         "sync-invoice-status-every-15-minutes": {
             "task": "tasks.sync.sync_invoice_status",
             "schedule": crontab(minute="*/15"),
+        },
+        "backup-database-daily": {
+            "task": "tasks.backup.run_backup",
+            "schedule": crontab(hour=2, minute=0),  # Daily at 2 AM UTC
         },
     },
     beat_schedule_filename="celerybeat-schedule",

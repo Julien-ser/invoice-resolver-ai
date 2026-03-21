@@ -14,7 +14,7 @@ from datetime import datetime, date, timedelta
 from unittest.mock import patch, MagicMock, Mock
 from jinja2 import Template
 
-from src.email.sender import (
+from src.mail.sender import (
     EmailSender,
     SMTPSender,
     SendGridSender,
@@ -508,7 +508,7 @@ class TestCeleryEmailTasks:
     @patch("src.tasks.email_tasks.send_followup_task")
     def test_process_followup_campaign(self, mock_send_task, celery_task_data):
         """Test that process_followup_campaign queues emails for eligible invoices."""
-        from src.tasks.email_tasks import process_followup_campaign
+        from src.tasks.mail_tasks import process_followup_campaign
 
         mock_send_task.delay.return_value = None
 
@@ -525,7 +525,7 @@ class TestCeleryEmailTasks:
         self, mock_send_task, celery_task_data
     ):
         """Test that invoices that already had a recent campaign are skipped."""
-        from src.tasks.email_tasks import process_followup_campaign
+        from src.tasks.mail_tasks import process_followup_campaign
         from src.models import Campaign
         from datetime import datetime, timedelta, timezone
 
@@ -554,7 +554,7 @@ class TestCeleryEmailTasks:
     @patch("src.tasks.email_tasks.process_followup_campaign")
     def test_scheduled_followups(self, mock_process):
         """Test the scheduled_followups task."""
-        from src.tasks.email_tasks import scheduled_followups
+        from src.tasks.mail_tasks import scheduled_followups
 
         # Mock process_followup_campaign to return different counts
         mock_process.side_effect = [5, 3, 1]  # 3-day, 7-day, 14-day counts
@@ -571,7 +571,7 @@ class TestCeleryEmailTasks:
     @patch("src.tasks.email_tasks.send_followup_email")
     def test_send_followup_task_wrapper(self, mock_send_email):
         """Test the send_followup_task Celery task wrapper."""
-        from src.tasks.email_tasks import send_followup_task
+        from src.tasks.mail_tasks import send_followup_task
 
         mock_send_email.return_value = MagicMock(id="campaign-123")
 
@@ -585,7 +585,7 @@ class TestCeleryEmailTasks:
     @patch("src.tasks.email_tasks.send_followup_email")
     def test_send_followup_task_wrapper_handles_error(self, mock_send_email):
         """Test that send_followup_task returns False on error."""
-        from src.tasks.email_tasks import send_followup_task
+        from src.tasks.mail_tasks import send_followup_task
 
         mock_send_email.side_effect = Exception("Database error")
 

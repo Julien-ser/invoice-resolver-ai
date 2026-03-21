@@ -10,7 +10,8 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 import paypalrestsdk
-from paypalrestsdk import ResourceNotFound, PayPalRESTException
+from paypalrestsdk import ResourceNotFound
+from paypalrestsdk.exceptions import ClientError
 
 from ..core.config import settings
 
@@ -77,7 +78,7 @@ class PayPalClient:
             }
             logger.info(f"PayPal account connected: {account_info.get('account_id')}")
             return account_info
-        except PayPalRESTException as e:
+        except ClientError as e:
             logger.error(f"PayPal OAuth connection failed: {e}")
             raise PayPalError(f"Failed to connect PayPal account: {str(e)}")
 
@@ -144,10 +145,10 @@ class PayPalClient:
                 }
             except ResourceNotFound:
                 raise PayPalError(f"PayPal resource not found: {invoice_id}")
-            except PayPalRESTException as e:
+            except ClientError as e:
                 logger.error(f"Failed to retrieve PayPal invoice {invoice_id}: {e}")
                 raise PayPalError(f"Failed to retrieve invoice: {str(e)}")
-        except PayPalRESTException as e:
+        except ClientError as e:
             logger.error(f"Failed to retrieve PayPal payment {invoice_id}: {e}")
             raise PayPalError(f"Failed to retrieve payment: {str(e)}")
 
@@ -211,7 +212,7 @@ class PayPalClient:
 
             logger.info(f"Retrieved {len(transactions)} PayPal transactions")
             return transactions
-        except PayPalRESTException as e:
+        except ClientError as e:
             logger.error(f"Failed to list PayPal transactions: {e}")
             raise PayPalError(f"Failed to list transactions: {str(e)}")
 
@@ -241,7 +242,7 @@ class PayPalClient:
                 "transaction_id": transaction_id,
                 "created_time": datetime.now(),
             }
-        except PayPalRESTException as e:
+        except ClientError as e:
             logger.error(f"Failed to create PayPal dispute: {e}")
             raise PayPalError(f"Failed to create dispute: {str(e)}")
 
@@ -274,7 +275,7 @@ class PayPalClient:
                 if dispute.dispute_amount
                 else "USD",
             }
-        except PayPalRESTException as e:
+        except ClientError as e:
             logger.error(f"Failed to retrieve PayPal dispute {dispute_id}: {e}")
             raise PayPalError(f"Failed to retrieve dispute: {str(e)}")
 
@@ -298,6 +299,6 @@ class PayPalClient:
                 "status": dispute.status,
                 "updated_at": datetime.now(),
             }
-        except PayPalRESTException as e:
+        except ClientError as e:
             logger.error(f"Failed to update PayPal dispute {dispute_id}: {e}")
             raise PayPalError(f"Failed to update dispute: {str(e)}")

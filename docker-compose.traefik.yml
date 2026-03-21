@@ -1,0 +1,47 @@
+# Traefik configuration for SSL termination and reverse proxy
+# Use with: docker-compose -f docker-compose.prod.yml -f docker-compose.traefik.yml up -d
+
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.2
+    container_name: invoice_resolver_traefik
+    restart: always
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      - "--certificatesresolvers.le.acme.email=${SSL_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.le.acme.storage=/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme.json:/acme.json
+      - ./traefik-dynamic.yml:/dynamic.yml:ro
+    networks:
+      - invoice_resolver_network
+      - traefik_public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOST:-traefik.local}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=le"
+      - "traefik.http.routers.traefik.middlewares=auth"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  invoice_resolver_network:
+    external: true
+  traefik_public:
+    external: true
