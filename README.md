@@ -39,6 +39,68 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
 - **PDF**: WeasyPrint or ReportLab
 - **Deployment**: Docker, GitHub Actions CI/CD
 
+## Billing & Subscriptions
+
+The application includes a complete Stripe Billing integration for managing user subscriptions and handling payment disputes.
+
+### Plans
+
+- **Free**: 5 invoices per month (default)
+- **Pro**: $19/month unlimited invoices, AI dispute drafting, A/B testing, priority support
+- **Legal Pack Add-on**: $5/month (premium legal templates, small claims forms)
+- **Multi-Currency Add-on**: $3/month (multiple currencies, auto conversion)
+
+### Environment Variables
+
+Configure these in your `.env` file:
+
+```bash
+# Stripe
+STRIPE_API_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_FREE=price_...
+STRIPE_PRICE_PRO=price_...
+STRIPE_PRICE_LEGAL_PACK=price_...
+STRIPE_PRICE_MULTI_CURRENCY=price_...
+```
+
+### API Endpoints
+
+- `GET /billing/plans` – List available subscription plans
+- `POST /billing/checkout` – Create a Stripe Checkout session for a plan
+- `GET /billing/subscription` – Get current user's subscription status
+- `GET /billing/invoice-limit` – Get invoice limit based on subscription tier
+- `POST /billing/webhook` – Stripe webhook endpoint (handle signature verification)
+
+### Webhook Events
+
+The system automatically handles:
+
+- `customer.subscription.updated` – Updates user's subscription tier
+- `customer.subscription.deleted` – Downgrades user to Free tier
+- `checkout.session.completed` – Logs successful subscription signup
+
+### How It Works
+
+1. User selects a plan and clicks "Subscribe"
+2. Frontend calls `/billing/checkout` to create a Stripe Checkout session
+3. User completes payment on Stripe's hosted page
+4. Stripe sends webhook to `/billing/webhook`
+5. System updates `user.subscription_tier` and `user.invoice_limit` accordingly
+6. Subscription status is available via `/billing/subscription`
+
+### Testing
+
+The `tests/test_billing.py` module provides comprehensive test coverage (19 tests) for:
+
+- Plan lookups by price ID and tier
+- Checkout session creation (with existing customer reuse)
+- Subscription info retrieval from Stripe API
+- Invoice limit calculation
+- Webhook event handling (signature verification, subscription updates)
+
+Set test environment variables in `tests/conftest.py` before running pytest.
+
 ## Project Structure
 
 ```
