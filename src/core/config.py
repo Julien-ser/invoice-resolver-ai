@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = (
-        "postgresql+psycopg2://postgres:postgres@localhost:5432/invoice_resolver"
+        "postgresql+psycopg://postgres:postgres@localhost:5432/invoice_resolver"
     )
     db_echo: bool = False
 
@@ -37,6 +37,12 @@ class Settings(BaseSettings):
 
     # OpenAI
     openai_api_key: Optional[str] = None
+
+    # SendGrid (optional alternative to SMTP)
+    sendgrid_api_key: Optional[str] = None
+
+    # Email backend (smtp or sendgrid)
+    email_backend: str = "smtp"
 
     # Email
     smtp_host: Optional[str] = None

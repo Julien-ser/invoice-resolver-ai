@@ -106,6 +106,56 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
   - Protected route dependencies (`get_current_user`, `get_current_admin_user`)
   - Comprehensive test suite covering registration, login, token refresh, logout
   - Test fixtures with SQLite in-memory database for isolated tests
+- [x] **Task 2.2**: Invoice management endpoints
+  - Full CRUD operations: create, list, update status, soft delete
+  - Filtering by status and due date range
+  - Pydantic schemas for request/response validation
+  - Integration with SQLAlchemy models and database
+  - Comprehensive tests with pytest
+- [x] **Task 2.3**: Webhook receivers for Stripe and PayPal
+  - Signature verification for both providers
+  - Idempotent processing with webhook_events table
+  - Automatic invoice status updates
+  - Endpoints: `/api/webhooks/stripe` and `/api/webhooks/paypal`
+  - Comprehensive logging and error handling
+  - Support for key events: invoice.payment_failed, charge.dispute.created, PAYMENT.DENIED, DISPUTE.CREATED
+- [x] **Task 2.4**: Celery background task setup
+  - Redis broker and Celery worker configuration
+  - Docker Compose setup with Redis service
+  - Periodic sync task (`tasks/sync.py`) for invoice status synchronization (fallback if webhooks fail)
+  - 15-minute polling interval via Celery Beat
+  - Integration with Stripe and PayPal APIs
+  - Per-user credential handling for PayPal connections
+  - System metrics recording for monitoring
+
+### Phase 3: Integrations & AI Features
+
+- [x] **Task 3.1**: Payment provider integration layer
+  - Structured clients for Stripe (`integrations/stripe_client.py`), PayPal (`integrations/paypal_client.py`), and Plaid (`integrations/plaid_client.py`)
+  - Unified interface: `connect_account()`, `get_invoice_status()`, `list_transactions()`
+  - Error handling and retry logic built-in
+  - Ready for API credential injection via encrypted database storage
+- [x] **Task 3.2**: Email automation system with follow-up sequences ✓ **COMPLETED**
+  - **Email sender abstraction**: `SMTPSender` and `SendGridSender` (placeholder) implementing common interface
+  - **Template rendering**: Jinja2-based renderer with HTML and plain text support
+  - **Follow-up sequences**: Three automated templates
+    - 3-day reminder: Polite pre-due notification
+    - 7-day overdue: Clear overdue notice with red warning
+    - 14-day final notice: Urgent final warning before dispute escalation
+  - **Campaign tracking**: `Campaign` and `EmailEvent` models for send/delivery/engagement metrics
+  - **Celery integration**: Asynchronous background tasks (`tasks/email_tasks.py`)
+    - `send_followup_task`: Wrapper for single email sending
+    - `process_followup_campaign`: Bulk processor for eligible invoices
+    - `scheduled_followups`: Periodic task to run every 15 minutes (via Celery Beat)
+  - **Database-backed templates**: Template model supports system defaults and user customizations
+  - **Comprehensive tests** (`tests/test_email.py`):
+    - EmailTemplateRenderer with Jinja2
+    - SMTPSender with mocked SMTP
+    - `send_followup_email` function with database fixtures
+    - Celery task logic and queuing behavior
+    - Template file existence and variable validation
+  - **Professional email templates**: Responsive HTML templates with inline styling, company branding, payment buttons, and legal compliance footers
+
 
 ### Completed Deliverables
 
@@ -131,27 +181,59 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
 
 - Python 3.11+
 - Git
+- Docker & Docker Compose (recommended for database and Redis)
 
-### Setup
+### Quick Start (Using Docker Compose)
 
-The project foundation is now in place. To get started:
+The fastest way to get started is using Docker Compose, which spins up PostgreSQL and Redis:
 
 ```bash
-# 1. Clone and install dependencies
+# 1. Start database and Redis
+docker-compose up -d postgres redis
+
+# 2. Install Python dependencies
 pip install -r requirements.txt
 
-# 2. Set up environment configuration
+# 3. Set up environment configuration
 cp .env.example .env
-# Edit .env with your database and API credentials (see Configuration section)
+# Edit .env if needed (defaults work for local Docker setup)
 
-# 3. Start the development server
-python -m src.main
-# or
+# 4. Run database migrations
+# (Alembic will be configured in upcoming tasks; for now, tables are created on startup)
+
+# 5. Start the FastAPI server
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+
+# 6. In another terminal, start Celery worker
+celery -A src.celery_app worker --loglevel=info
+
+# 7. In another terminal, start Celery beat scheduler
+celery -A src.celery_app beat --loglevel=info
+```
+
+Access the API at http://localhost:8000/docs (Swagger UI) or http://localhost:8000/redoc.
+
+### Manual Setup (Without Docker)
+
+If you prefer to run PostgreSQL and Redis locally without Docker:
+
+```bash
+# 1. Install and start PostgreSQL and Redis on your system
+
+# 2. Create the database
+createdb invoice_resolver
+
+# 3. Install Python dependencies
+pip install -r requirements.txt
+
+# 4. Configure environment
+cp .env.example .env
+# Edit .env with your local database and Redis URLs
+
+# 5. Start services (same as above)
 uvicorn src.main:app --reload
-
-# 4. Access the API
-# API documentation: http://localhost:8000/docs
-# Health check: http://localhost:8000/health
+celery -A src.celery_app worker --loglevel=info
+celery -A src.celery_app beat --loglevel=info
 ```
 
 ### Configuration

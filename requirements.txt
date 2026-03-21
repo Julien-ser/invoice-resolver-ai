@@ -13,8 +13,21 @@ passlib[bcrypt]==1.7.4
 # Database migrations
 alembic==1.13.1
 
+# Payment providers
+stripe==9.0.0
+paypalrestsdk==2.0.0
+plaid-python==11.0.0
+
+# Testing
 # Testing
 pytest==7.4.4
 pytest-cov==4.1.0
 pytest-asyncio==0.21.1
 httpx==0.25.1
+
+# Background tasks
+celery==5.3.4
+redis==5.0.1
+
+# Email templates
+jinja2==3.1.3

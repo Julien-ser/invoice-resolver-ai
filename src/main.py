@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import settings
 from .core.logger import setup_logging, get_logger
+from .api.auth import router as auth_router
+from .api.invoices import router as invoices_router
+from .api.webhooks import router as webhooks_router
+from .middleware import SubscriptionLimitCheckerMiddleware
 
 # Setup logging
 setup_logging(log_level="INFO", log_file=None)
@@ -24,6 +28,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add subscription limit checker middleware
+app.add_middleware(SubscriptionLimitCheckerMiddleware)
+
+# Include routers
+app.include_router(auth_router)
+app.include_router(invoices_router)
+app.include_router(webhooks_router)
+
+# Future routers (to be implemented in later tasks)
+# app.include_router(invoice_router, prefix="/api/invoices", tags=["invoices"])
+# app.include_router(webhook_router, prefix="/api/webhooks", tags=["webhooks"])
+# app.include_router(admin_router, prefix="/api/admin", tags=["admin"])
 
 
 @app.get("/health")

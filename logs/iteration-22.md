@@ -1,7 +1,7 @@
-# Iteration 3 - invoice-resolver-ai
+# Iteration 22 - invoice-resolver-ai
 
-**Timestamp:** Fri Mar 20 10:02:02 PM EDT 2026
-**Task:** **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
+**Timestamp:** Fri Mar 20 10:52:59 PM EDT 2026
+**Task:** **Task 3.2:** Build email automation system using SendGrid or SMTP (smtplib) with template rendering (Jinja2). Create follow-up sequences: 3-day reminder, 7-day late notice, 14-day final notice before dispute.
 
 ## Prompt Sent
 
@@ -339,13 +339,13 @@ Switch back to `generic` when the specialist work is done.
 ---
 
 ### ⚠️ CRITICAL TOKEN CONSTRAINTS:
-- Iteration: 3 / 64k Token Budget
+- Iteration: 22 / 64k Token Budget
 - Attempt: 2 (previous attempts may have partial progress)
 - **Mandate:** Operate efficiently. Use partial edits, not full file rewrites when possible.
 - **Output:** Be concise and action-oriented.
 
 
-## CURRENT PROJECT STATE (Iteration 3)
+## CURRENT PROJECT STATE (Iteration 22)
 
 ```
 # invoice-resolver-ai
@@ -368,25 +368,25 @@ Switch back to `generic` when the specialist work is done.
 ## Phase 1: Planning & Setup
 - [x] **Task 1.1:** Design complete database schema (PostgreSQL) for users, invoices, templates, campaigns, payment connections, and A/B test results. Create ER diagram and write migration SQL.
   - *Deliverable:* `schema.sql` with tables: users (subscription_tier, invoice_limit), invoices (status, due_date, amount, stripe_payment_intent_id, paypal_txn_id, plaid_account_id), payment_connections (provider, credentials_encrypted, user_id), templates (type, content, variables), campaigns (template_id, sent_at, opened_at, paid_after), ab_tests (variant, metric, result).
-- [ ] **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
+- [x] **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
   - *Deliverable:* Project scaffold with `main.py`, `core/config.py`, `core/logger.py`, `requirements.txt` or `pyproject.toml` including: fastapi, uvicorn, sqlalchemy, psycopg2-binary, pydantic, python-dotenv.
-- [ ] **Task 1.3:** Setup PostgreSQL database locally (docker-compose.yml) and implement SQLAlchemy models with Alembic migrations for the schema.
+- [x] **Task 1.3:** Setup PostgreSQL database locally (docker-compose.yml) and implement SQLAlchemy models with Alembic migrations for the schema.
   - *Deliverable:* `docker-compose.yml` with PostgreSQL service, `models.py` with all SQLAlchemy models, Alembic setup with initial migration.
-- [ ] **Task 1.4:** Create comprehensive API documentation outline and define OpenAPI specs for all endpoints to be built (authentication, invoice CRUD, webhook receivers, admin endpoints).
+- [x] **Task 1.4:** Create comprehensive API documentation outline and define OpenAPI specs for all endpoints to be built (authentication, invoice CRUD, webhook receivers, admin endpoints).
   - *Deliverable:* `docs/api.md` with endpoint list, request/response schemas, authentication flow (JWT), and webhook payload examples for Stripe/PayPal.
 
 ## Phase 2: Core Backend & Data Model
-- [ ] **Task 2.1:** Implement FastAPI user authentication system with JWT tokens, password hashing (bcrypt), and subscription tier enforcement middleware (check invoice limits for freemium users).
+- [x] **Task 2.1:** Implement FastAPI user authentication system with JWT tokens, password hashing (bcrypt), and subscription tier enforcement middleware (check invoice limits for freemium users).
   - *Deliverable:* `api/auth.py` with /register, /login, /refresh endpoints, `middleware.py` with SubscriptionLimitChecker, and protected route decorator.
-- [ ] **Task 2.2:** Build invoice management endpoints: create invoice (manual import), list invoices with filters (status, due_date range), update status (mark as paid/disputed), and soft delete. Integrate with database models.
+- [x] **Task 2.2:** Build invoice management endpoints: create invoice (manual import), list invoices with filters (status, due_date range), update status (mark as paid/disputed), and soft delete. Integrate with database models.
   - *Deliverable:* `api/invoices.py` with CRUD operations, Pydantic schemas for InvoiceCreate/Update/Response, and integration tests using pytest.
-- [ ] **Task 2.3:** Implement webhook receivers for Stripe (invoice.payment_failed, charge.dispute.created) and PayPal (PAYMENT.DENIED, DISPUTE.CREATED) to automatically update invoice status in database.
+- [x] **Task 2.3:** Implement webhook receivers for Stripe (invoice.payment_failed, charge.dispute.created) and PayPal (PAYMENT.DENIED, DISPUTE.CREATED) to automatically update invoice status in database.
   - *Deliverable:* `api/webhooks.py` with signature verification for Stripe (webhook secret) and PayPal (transmission ID + secret), endpoint at /webhooks/{provider}, event handler functions that update invoice records and trigger Celery tasks.
-- [ ] **Task 2.4:** Setup Celery with Redis broker, create worker processes, and implement background task for invoice status synchronization (periodic polling as fallback if webhooks fail).
+- [x] **Task 2.4:** Setup Celery with Redis broker, create worker processes, and implement background task for invoice status synchronization (periodic polling as fallback if webhooks fail).
   - *Deliverable:* `celery_app.py` configured with Redis, `tasks/sync.py` with periodic task (every 15 min) that queries Stripe/PayPal APIs for invoice status updates, and worker startup script.
 
 ## Phase 3: Integrations & AI Features
-- [ ] **Task 3.1:** Implement payment provider integration layer: Stripe API client (stripe-python) for retrieving invoices, payment intents, and customers; PayPal API client (paypalrestsdk) for txns and disputes; Plaid integration for bank feed linking (link token creation, transactions sync).
+- [x] **Task 3.1:** Implement payment provider integration layer: Stripe API client (stripe-python) for retrieving invoices, payment intents, and customers; PayPal API client (paypalrestsdk) for txns and disputes; Plaid integration for bank feed linking (link token creation, transactions sync).
   - *Deliverable:* `integrations/stripe_client.py`, `integrations/paypal_client.py`, `integrations/plaid_client.py` with functions: connect_account, get_invoice_status, list_transactions, and error handling.
 - [ ] **Task 3.2:** Build email automation system using SendGrid or SMTP (smtplib) with template rendering (Jinja2). Create follow-up sequences: 3-day reminder, 7-day late notice, 14-day final notice before dispute.
   - *Deliverable:* `email/sender.py` with send_followup_email(invoice, template_type), `email/templates/` directory with HTML templates for each follow-up stage, and queue system using Celery for scheduled sends.
@@ -415,7 +415,7 @@ Switch back to `generic` when the specialist work is done.
 ```
 
 ## NEXT TASK TO COMPLETE:
-**Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
+**Task 3.2:** Build email automation system using SendGrid or SMTP (smtplib) with template rendering (Jinja2). Create follow-up sequences: 3-day reminder, 7-day late notice, 14-day final notice before dispute.
 
 **Instructions:** Complete this task. Mark [x] in TASKS.md when done. Create, modify, or delete files as needed. Execute commands as needed. Also update README.md to match this project (name, setup instructions, current progress). No permission needed—just act.
 ```
@@ -426,454 +426,279 @@ Switch back to `generic` when the specialist work is done.
 [0m
 > build · stepfun/step-3.5-flash:free
 [0m
-I'll help you complete Task 1.2: Initialize Python/FastAPI project structure. Let me start by checking the current state of the project.
-[0m→ [0mRead .agent_role
-[0m→ [0mRead TASKS.md
-[0m
-[0m$ [0mls -la
-total 124
-drwxr-xr-x  8 julien julien  4096 Mar 20 22:01 .
-drwxr-xr-x 30 julien julien  4096 Mar 20 21:57 ..
--rw-r--r--  1 julien julien     8 Mar 20 21:58 .agent_role
-drwxr-xr-x  2 julien julien  4096 Mar 20 21:59 docs
--rw-r--r--  1 julien julien  1021 Mar 20 22:01 .env.example
-drwxr-xr-x  7 julien julien  4096 Mar 20 21:58 .git
-drwxr-xr-x  3 julien julien  4096 Mar 20 21:57 .github
--rw-r--r--  1 julien julien     4 Mar 20 21:57 .gitignore
-drwxr-xr-x  2 julien julien  4096 Mar 20 22:02 logs
--rw-r--r--  1 julien julien  9218 Mar 20 21:57 prompt.txt
--rw-r--r--  1 julien julien  9336 Mar 20 22:01 README.md
--rw-r--r--  1 julien julien   216 Mar 20 22:00 requirements.txt
-drwxr-xr-x  3 julien julien  4096 Mar 20 22:00 .ruff_cache
--rw-r--r--  1 julien julien 20731 Mar 20 21:58 schema.sql
-drwxr-xr-x  3 julien julien  4096 Mar 20 22:01 src
--rw-r--r--  1 julien julien  9440 Mar 20 21:59 TASKS.md
--rw-r--r--  1 julien julien  9440 Mar 20 21:58 TASKS_original.md
--rw-r--r--  1 julien julien     6 Mar 20 21:58 .worker_persistent_mode
-[0m
-Let me check what's already in the src directory and the existing files:
-[0m$ [0mfind src -type f
-src/main.py
-src/core/config.py
-src/core/logger.py
-[0m
+[0m✗ [0mread failed
+[91m[1mError: [0mFile not found: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/pyproject.toml
 [0m→ [0mRead requirements.txt
-[0m→ [0mRead .env.example
-[0m→ [0mRead src/main.py
+I'll complete Task 3.2 by building the email automation system with follow-up sequences. Let me first explore the current project structure to understand the codebase.
+[0m
+[0m$ [0mfind . -type f -name "*.py" | head -20
+./alembic/versions/001_initial_schema_20260320.py
+./alembic/env.py
+./tests/test_invoices.py
+./tests/conftest.py
+./tests/test_auth.py
+./tests/test_webhooks.py
+./src/__init__.py
+./src/api/invoices.py
+./src/api/__init__.py
+./src/api/deps.py
+./src/api/webhooks.py
+./src/api/auth.py
+./src/main.py
+./src/middleware.py
+./src/celery_app.py
+./src/integrations/__init__.py
+./src/integrations/paypal_client.py
+./src/integrations/stripe_client.py
+./src/integrations/plaid_client.py
+./src/core/__init__.py
+[0m
+Now let me check the database models and configuration to understand what we're working with:
 [0m→ [0mRead src/core/config.py
-[0m→ [0mRead src/core/logger.py
-Let me check what's already in the existing files:
-Let me check the project structure and see if there are any __init__.py files needed:
+[0m→ [0mRead src/models.py
+Now I'll create the email automation system. Let me add the necessary dependencies and build the email module:
 [0m
-[0m$ [0mfind src -name "*.py" -o -name "__init__.py"
-src/main.py
-src/core/config.py
-src/core/logger.py
-[0m
-[0m→ [0mRead README.md
-I can see the project structure is already largely complete. Let me verify if there are missing __init__.py files and test that everything works:
-[0m
-[0m$ [0mls -la src/ && ls -la src/core/
-total 16
-drwxr-xr-x 3 julien julien 4096 Mar 20 22:01 .
-drwxr-xr-x 8 julien julien 4096 Mar 20 22:01 ..
-drwxr-xr-x 2 julien julien 4096 Mar 20 22:01 core
--rw-r--r-- 1 julien julien 1293 Mar 20 22:01 main.py
-total 16
-drwxr-xr-x 2 julien julien 4096 Mar 20 22:01 .
-drwxr-xr-x 3 julien julien 4096 Mar 20 22:01 ..
--rw-r--r-- 1 julien julien 1535 Mar 20 22:00 config.py
--rw-r--r-- 1 julien julien 2043 Mar 20 22:01 logger.py
-[0m
-[0m$ [0mpython3 -c "import sys; sys.path.insert(0, '.'); from src.main import app; from src.core.config import settings; from src.core.logger import setup_logging; print('All imports successful')"
-2026-03-20 22:02:37 - src.core.logger - INFO - Logging configured: level=INFO, file=None
-All imports successful
-[0m
-Perfect! The imports work successfully. Now I need to add missing __init__.py files to make it a proper Python package structure and mark the task as complete. Let me create the __init__.py files:
-[0m← [0mWrite src/core/__init__.py
-Wrote file successfully.
-[0m
-[0m← [0mWrite src/__init__.py
-Wrote file successfully.
-[0m
-Now I'll mark Task 1.2 as complete in TASKS.md:
-[0m← [0mEdit TASKS.md
-Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/TASKS.md
+[0m← [0mEdit requirements.txt
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/requirements.txt
 ===================================================================
---- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/TASKS.md
-+++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/TASKS.md
-@@ -17,9 +17,9 @@
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/requirements.txt
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/requirements.txt
+@@ -26,5 +26,8 @@
+ httpx==0.25.1
  
- ## Phase 1: Planning & Setup
- - [x] **Task 1.1:** Design complete database schema (PostgreSQL) for users, invoices, templates, campaigns, payment connections, and A/B test results. Create ER diagram and write migration SQL.
-   - *Deliverable:* `schema.sql` with tables: users (subscription_tier, invoice_limit), invoices (status, due_date, amount, stripe_payment_intent_id, paypal_txn_id, plaid_account_id), payment_connections (provider, credentials_encrypted, user_id), templates (type, content, variables), campaigns (template_id, sent_at, opened_at, paid_after), ab_tests (variant, metric, result).
--- [ ] **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
-+- [x] **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
-   - *Deliverable:* Project scaffold with `main.py`, `core/config.py`, `core/logger.py`, `requirements.txt` or `pyproject.toml` including: fastapi, uvicorn, sqlalchemy, psycopg2-binary, pydantic, python-dotenv.
- - [ ] **Task 1.3:** Setup PostgreSQL database locally (docker-compose.yml) and implement SQLAlchemy models with Alembic migrations for the schema.
-   - *Deliverable:* `docker-compose.yml` with PostgreSQL service, `models.py` with all SQLAlchemy models, Alembic setup with initial migration.
- - [ ] **Task 1.4:** Create comprehensive API documentation outline and define OpenAPI specs for all endpoints to be built (authentication, invoice CRUD, webhook receivers, admin endpoints).
+ # Background tasks
+ celery==5.3.4
+-redis==5.0.1
+\ No newline at end of file
++redis==5.0.1
++
++# Email templates
++jinja2==3.1.3
+\ No newline at end of file
 
 [0m
-Let me check if the GitHub Actions workflow exists and create it if needed (Task 0):
-[0m$ [0mls -la .github/workflows/
-total 40
-drwxr-xr-x 2 julien julien 4096 Mar 20 21:57 .
-drwxr-xr-x 3 julien julien 4096 Mar 20 21:57 ..
--rw-r--r-- 1 julien julien 6143 Mar 20 21:57 deploy-production.yml
--rw-r--r-- 1 julien julien 4295 Mar 20 21:57 deploy-staging.yml
--rw-r--r-- 1 julien julien 3218 Mar 20 21:57 report-ci-errors.yml
--rw-r--r-- 1 julien julien 3227 Mar 20 21:57 test.yml
--rw-r--r-- 1 julien julien 6783 Mar 20 21:57 wiggum-system-check.yml
+[0m$ [0mmkdir -p /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/templates
 [0m
-Good! The test.yml workflow already exists, so Task 0 is already done. Now let me commit the changes for Task 1.2. First, let me see what changes we have:
-[0m$ [0mgit status
-On branch wiggum/session-1774058292
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-	modified:   README.md
-	modified:   TASKS.md
+[0m← [0mWrite src/email/__init__.py
+Wrote file successfully.
+[0m
+Now let me create the main email sender module:
+[0m← [0mWrite src/email/sender.py
+Wrote file successfully.
 
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-	.agent_role
-	.env.example
-	.worker_persistent_mode
-	TASKS_original.md
-	docs/
-	logs/
-	requirements.txt
-	schema.sql
-	src/
+LSP errors detected in other files:
+<diagnostics file="/home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/__init__.py">
+ERROR [8:6] Import ".sender" could not be resolved
+</diagnostics>
+[0m
+Now let me create the email templates:
+[0m← [0mWrite src/email/templates/follow_up_3_day.html
+Wrote file successfully.
 
-no changes added to commit (use "git add" and/or "git commit -a")
+LSP errors detected in other files:
+<diagnostics file="/home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py">
+ERROR [18:29] "get_db" is unknown import symbol
+ERROR [67:13] Argument of type "str | None" cannot be assigned to parameter "val" of type "str" in function "__setitem__"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [88:31] Argument of type "str | None" cannot be assigned to parameter "host" of type "str" in function "__init__"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [90:30] Argument of type "str | None" cannot be assigned to parameter "user" of type "str" in function "login"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [90:45] Argument of type "str | None" cannot be assigned to parameter "password" of type "str" in function "login"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [105:33] Cannot access attribute "sendgrid_api_key" for class "Settings"
+  Attribute "sendgrid_api_key" is unknown
+ERROR [233:49] "func" is not defined
+ERROR [250:50] "func" is not defined
+</diagnostics>
 [0m
-Let me check what changed in README.md:
-[0m$ [0mgit diff README.md
-diff --git a/README.md b/README.md
-index a6529f7..8abdabd 100644
---- a/README.md
-+++ b/README.md
-@@ -1,29 +1,259 @@
--# Project Template
-+# Invoice Resolver AI
+Let me fix the import issues first:
+[0m← [0mEdit src/email/sender.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+@@ -13,10 +13,11 @@
+ from jinja2 import Environment, FileSystemLoader, Template
+ from sqlalchemy.orm import Session
  
--This is a template for new projects created via `wiggum_master.sh create`.
-+**An autonomous AI agent for resolving invoice disputes and recovering unpaid invoices.**
+ from ..core.config import settings
+-from ..models import Template, Campaign, EmailEvent, User, Invoice
+ from ..core.database import get_db
++from ..models import Template, Campaign, EmailEvent, User, Invoice
++from sqlalchemy import func
  
--Each project:
--- Lives in `projects/<project-name>/`
--- Has its own GitHub repository
--- Runs its own autonomous OpenCode agent loop
--- Tracks progress in TASKS.md
-+---
+ logger = logging.getLogger(__name__)
  
--## Setup
-+## Problem
  
--1. Create: `bash wiggum_master.sh create "my-project" "Description"`
--2. View: `cat projects/my-project/README.md`
--3. Initialize: `cd projects/my-project && opencode /init --yes`
--4. Run: `cd projects/my-project && bash wiggum.sh`
-+Freelancers and small SaaS founders waste hours chasing unpaid invoices, drafting dispute letters, and navigating payment platforms. Payment delays and chargebacks are common, but resolution is manual and frustrating.
- 
--## Files
-+## Solution
- 
--- **README.md** - Project documentation
--- **TASKS.md** - Development task list
--- **prompt.txt** - Agent instructions (project-specific)
--- **AGENTS.md** - Project context (auto-generated)
--- **src/** - Source code directory
--- **tests/** - Test files
-+An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue or disputed invoices, and automatically:
- 
--## Customization
-+- Sends polite follow-ups with payment links
-+- Drafts formal dispute letters (with evidence attachments) for chargebacks
-+- Escalates to small claims paperwork if needed (pre-filled forms)
-+- Learns which templates and timing work best (A/B testing)
- 
--Update TASKS.md with your project goals, then let the agent handle it!
-+## Features
-+
-+- **Multi-provider Integration**: Stripe, PayPal, and Plaid (bank feeds)
-+- **AI-Powered Dispute Drafting**: GPT-4/Claude integration for legal letters
-+- **Automated Email Campaigns**: Follow-up sequences (3, 7, 14 days)
-+- **PDF Generation**: Dispute letters and small claims forms
-+- **A/B Testing**: Optimize templates and timing
-+- **Analytics Dashboard**: Recovery rates, campaign performance
-+- **Admin Panel**: User management, system health monitoring
-+- **Freemium Model**: 5 free invoices/month, $19/mo unlimited
-+
-+## Tech Stack
-+
-+- **Backend**: Python 3.11+, FastAPI, PostgreSQL
-+- **Task Queue**: Celery + Redis
-+- **AI Integration**: OpenAI GPT-4 / Anthropic Claude
-+- **Payment APIs**: Stripe, PayPal REST SDK, Plaid
-+- **Email**: SendGrid / SMTP with Jinja2 templates
-+- **Dashboard**: Streamlit
-+- **PDF**: WeasyPrint or ReportLab
-+- **Deployment**: Docker, GitHub Actions CI/CD
-+
-+## Project Structure
-+
-+```
-+.
-+├── README.md              # Project documentation
-+├── TASKS.md               # Development task list (track progress)
-+├── schema.sql             # PostgreSQL database schema
-+├── docs/
-+│   └── database-er-diagram.md  # ER diagram and table docs
-+├── .github/
-+│   └── workflows/
-+│       └── test.yml       # CI pipeline (to be created)
-+├── src/                   # Source code (to be created)
-+│   ├── api/              # FastAPI endpoints
-+│   ├── core/             # Configuration, logging
-+│   ├── models/           # SQLAlchemy models
-+│   ├── integrations/     # Stripe/PayPal/Plaid clients
-+│   ├── email/            # Email automation
-+│   ├── ai/               # AI dispute drafter
-+│   ├── pdf/              # PDF generator
-+│   ├── dashboard/        # Streamlit app
-+│   ├── ab_testing/       # A/B testing framework
-+│   ├── admin/            # Admin panel
-+│   ├── billing/          # Stripe billing
-+│   ├── tasks/            # Celery tasks
-+│   └── utils/            # Helper functions
-+├── tests/                 # Test suite (pytest)
-+├── docker-compose.yml     # Local development (PostgreSQL, Redis)
-+├── Dockerfile             # API container
-+├── Dockerfile.celery      # Celery worker container
-+├── pyproject.toml         # Dependencies (Poetry) or requirements.txt
-+└── .env.example           # Environment variables template
-+```
-+
-+## Current Progress
-+
-+### Phase 1: Planning & Setup
-+
-+- [x] **Task 1.1**: Database schema design
-+  - 11 core tables with relationships
-+  - Comprehensive indexes for performance
-+  - Row Level Security (RLS) policies
-+  - Database functions and views
-+  - Full ER diagram with table documentation
-+- [x] **Task 1.2**: FastAPI project structure initialization
-+  - Core configuration module (`src/core/config.py`) with environment-based settings
-+  - Logging setup (`src/core/logger.py`) with console and file handlers
-+  - Main FastAPI application (`src/main.py`) with health check and CORS
-+  - Dependencies in `requirements.txt`: fastapi, uvicorn, sqlalchemy, psycopg2-binary, pydantic, python-dotenv, bcrypt, python-jose, passlib
-+  - Environment variable template (`.env.example`)
-+- [ ] Task 1.3: PostgreSQL setup with SQLAlchemy + Alembic
-+- [ ] Task 1.4: API documentation outline
-+
-+### Completed Deliverables
-+
-+1. **`schema.sql`**: Complete PostgreSQL migration script with:
-+   - Users, invoices, payment connections, templates
-+   - Campaigns, A/B tests, email events, webhooks
-+   - Audit logs, refresh tokens, system metrics
-+   - Triggers for auto-updating timestamps
-+   - Functions for business logic (`check_invoice_limit`, `calculate_recovery_rate`, `get_overdue_count`)
-+   - Materialized views for common queries
-+   - Encryption extension support for security
-+
-+2. **`docs/database-er-diagram.md`**: Detailed documentation including:
-+   - Visual ER diagram with relationship cardinalities
-+   - Table descriptions with column types and purposes
-+   - Index strategy and performance notes
-+   - Security policies (RLS)
-+   - Migration and rollback instructions
-+
-+## Getting Started (Local Development)
-+
-+### Prerequisites
-+
-+- Python 3.11+
-+- Git
-+
-+### Setup
-+
-+The project foundation is now in place. To get started:
-+
-+```bash
-+# 1. Clone and install dependencies
-+pip install -r requirements.txt
-+
-+# 2. Set up environment configuration
-+cp .env.example .env
-+# Edit .env with your database and API credentials (see Configuration section)
-+
-+# 3. Start the development server
-+python -m src.main
-+# or
-+uvicorn src.main:app --reload
-+
-+# 4. Access the API
-+# API documentation: http://localhost:8000/docs
-+# Health check: http://localhost:8000/health
-+```
-+
-+### Configuration
-+
-+Create a `.env` file from `.env.example` and configure:
-+
-+- **Database**: `DATABASE_URL` (PostgreSQL connection string)
-+- **JWT**: `SECRET_KEY` for token signing
-+- **Payment APIs**: Stripe, PayPal, Plaid credentials
-+- **AI**: `OPENAI_API_KEY` for dispute letter generation
-+- **Email**: SMTP settings for sending follow-ups
-+- **Redis**: `REDIS_URL` for Celery task queue
-+
-+See `.env.example` for all available options.
-+
-+### Project Structure
-+
-+```
-+.
-+├── .env.example            # Environment variables template
-+├── requirements.txt        # Python dependencies
-+├── src/
-+│   ├── main.py            # FastAPI application entry point
-+│   └── core/
-+│       ├── config.py      # Settings management (pydantic-settings)
-+│       └── logger.py      # Logging configuration
-+├── docs/                  # Documentation
-+├── schema.sql             # Database schema (Phase 1.1)
-+└── TASKS.md               # Development task list
-+```
-+
-+### Current Status
-+
-+- ✅ Phase 1.1: Database schema design complete
-+- ✅ Phase 1.2: FastAPI project structure initialized
-+- 🔄 Phase 1.3: PostgreSQL setup (next task)
-+- 🔄 Phase 1.4: API documentation outline (pending)
-+
-+## API Overview (Planned)
-+
-+### Public Endpoints
-+
-+- `POST /register` - User registration
-+- `POST /login` - JWT authentication
-+- `POST /refresh` - Refresh token rotation
-+
-+### Protected Endpoints
-+
-+- `GET|POST /invoices` - Invoice CRUD with filters
-+- `GET /invoices/{id}` - Retrieve invoice details
-+- `PATCH /invoices/{id}/status` - Update payment status
-+- `POST /templates` - Create custom email templates
-+- `GET|POST /campaigns` - Campaign management
-+- `GET /analytics/recovery-rate` - KPI metrics
-+
-+### Webhook Endpoints
-+
-+- `POST /webhooks/stripe` - Stripe event receiver
-+- `POST /webhooks/paypal` - PayPal IPN handler
-+- `POST /webhooks/plaid` - Plaid transaction sync
-+
-+### Admin Endpoints (Admin only)
-+
-+- `GET /admin/users` - List all users
-+- `GET /admin/metrics` - System health metrics
-+- `POST /admin/users/{id}/tier` - Change subscription tier
-+
-+## Database Schema Highlights
-+
-+### Tables (11 core tables)
-+
-+| Table | Purpose | Key Columns |
-+|-------|---------|-------------|
-+| `users` | Account management | subscription_tier, invoice_limit |
-+| `payment_connections` | Encrypted credentials | provider (stripe/paypal/plaid) |
-+| `invoices` | Invoice records | status, stripe_payment_intent_id |
-+| `templates` | Email/document templates | type, variables (JSON) |
-+| `campaigns` | Campaign tracking | ab_test_variant, paid_after_send |
-+| `ab_tests` | Experiment definitions | test_type, variants (JSON) |
-+| `email_events` | Engagement tracking | event_type, occurred_at |
-+| `webhook_events` | Idempotency store | provider, event_id (unique) |
-+| `audit_logs` | Compliance logging | action, old_values, new_values |
-+| `refresh_tokens` | JWT rotation | token_hash, expires_at |
-+| `system_metrics` | Time-series data | metric_name, metric_value |
-+
-+### Key Features
-+
-+- **UUID primary keys** for security and distributed systems
-+- **JSONB columns** for flexible metadata storage
-+- **Partial indexes** on frequently queried external IDs
-+- **Row Level Security** for multi-tenant isolation
-+- **Encrypted credentials** for payment provider integrations
-+- **Audit trail** for all data changes
-+- **Idempotent webhook processing** via unique constraints
-+- **Automatic timestamp updates** via triggers
-+- **Materialized views** for dashboard performance
-+
-+## Environment Variables
-+
-+To be documented once implemented (after Task 1.2).
-+
-+## Testing
-+
-+Test suite will be implemented in Phase 5 using pytest with >80% coverage.
-+
-+```bash
-+pytest tests/ -v --cov=src --cov-report=html
-+```
-+
-+## Deployment
-+
-+Production deployment instructions will be added in Phase 5 (Docker, cloud hosting, CI/CD).
-+
-+## License
-+
-+To be determined.
-+
-+## Contact
-+
-+For questions or feedback about this project, please open an issue on GitHub.
+
 [0m
-Let me check the git branches:
-[0m$ [0mgit branch -a
-main
-* wiggum/session-1774058292
+Let me check the database module structure and fix config:
+[0m→ [0mRead src/core/database.py
 [0m
-I'll commit and push the changes. Since I'm on a feature branch, I'll push to the same branch on origin:
-[0m$ [0mgit add . && git commit -m "feat: complete Task 1.2 - initialize FastAPI project structure" && git push -u origin HEAD
-[wiggum/session-1774058292 9df2ac3] feat: complete Task 1.2 - initialize FastAPI project structure
- 21 files changed, 4707 insertions(+), 23 deletions(-)
- create mode 100644 .agent_role
- create mode 100644 .env.example
- create mode 100644 .worker_persistent_mode
- create mode 100644 TASKS_original.md
- create mode 100644 docs/database-er-diagram.md
- create mode 100644 logs/iteration-1.md
- create mode 100644 logs/iteration-2.md
- create mode 100644 logs/iteration-3.md
- create mode 100644 logs/worker-session-20260320-215812.log
- create mode 100644 requirements.txt
- create mode 100644 schema.sql
- create mode 100644 src/__init__.py
- create mode 100644 src/__pycache__/main.cpython-314.pyc
- create mode 100644 src/core/__init__.py
- create mode 100644 src/core/__pycache__/config.cpython-314.pyc
- create mode 100644 src/core/__pycache__/logger.cpython-314.pyc
- create mode 100644 src/core/config.py
- create mode 100644 src/core/logger.py
- create mode 100644 src/main.py
-To https://github.com/Julien-ser/invoice-resolver-ai.git
- * [new branch]      HEAD -> wiggum/session-1774058292
-branch 'wiggum/session-1774058292' set up to track 'origin/wiggum/session-1774058292'.
+[0m← [0mEdit src/core/config.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/core/config.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/core/config.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/core/config.py
+@@ -37,8 +37,14 @@
+ 
+ # OpenAI
+ openai_api_key: Optional[str] = None
+ 
++# SendGrid (optional alternative to SMTP)
++sendgrid_api_key: Optional[str] = None
++
++# Email backend (smtp or sendgrid)
++email_backend: str = "smtp"
++
+ # Email
+ smtp_host: Optional[str] = None
+ smtp_port: int = 587
+ smtp_username: Optional[str] = None
+
 [0m
-Perfect! Task 1.2 is complete. Let me verify the TASKS.md update:
-[0m$ [0mgrep -A 2 "Task 1.2" TASKS.md
-- [x] **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
-  - *Deliverable:* Project scaffold with `main.py`, `core/config.py`, `core/logger.py`, `requirements.txt` or `pyproject.toml` including: fastapi, uvicorn, sqlalchemy, psycopg2-binary, pydantic, python-dotenv.
-- [ ] **Task 1.3:** Setup PostgreSQL database locally (docker-compose.yml) and implement SQLAlchemy models with Alembic migrations for the schema.
+Now let me fix the sender.py with correct imports and type handling:
+[0m← [0mEdit src/email/sender.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+@@ -13,9 +13,9 @@
+ from jinja2 import Environment, FileSystemLoader, Template
+ from sqlalchemy.orm import Session
+ 
+ from ..core.config import settings
+-from ..core.database import get_db
++from ..core.database import get_session
+ from ..models import Template, Campaign, EmailEvent, User, Invoice
+ from sqlalchemy import func
+ 
+ logger = logging.getLogger(__name__)
+
+[0m
+Let me read the current file and fix all issues comprehensively:
+[0m→ [0mRead src/email/sender.py
+Now let me fix all the issues at once:
+[0m
+[0m← [0mEdit src/email/sender.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+@@ -160,12 +160,12 @@
+ 
+ Returns:
+     Campaign object if successful, None otherwise
+ """
+-close_db = False
+-if db is None:
+-    db = next(get_db())
+-    close_db = True
++ close_db = False
++ if db is None:
++     db = next(get_session())
++     close_db = True
+ 
+ try:
+     # Get invoice with related data
+     from sqlalchemy import select
+
+[0m
+[0m→ [0mRead src/email/sender.py[90m [limit=30, offset=40][0m
+Let me read the specific lines around the errors and fix systematically:
+[0m→ [0mRead src/email/sender.py[90m [limit=30, offset=160][0m
+I'll rewrite the entire sender.py file cleanly to fix all issues:
+[0m
+[0m← [0mWrite src/email/sender.py
+Wrote file successfully.
+
+LSP errors detected in this file, please fix:
+<diagnostics file="/home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py">
+ERROR [68:13] Argument of type "str | None" cannot be assigned to parameter "val" of type "str" in function "__setitem__"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [89:31] Argument of type "str | None" cannot be assigned to parameter "host" of type "str" in function "__init__"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [91:30] Argument of type "str | None" cannot be assigned to parameter "user" of type "str" in function "login"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+ERROR [91:45] Argument of type "str | None" cannot be assigned to parameter "password" of type "str" in function "login"
+  Type "str | None" is not assignable to type "str"
+    "None" is not assignable to "str"
+</diagnostics>
+[0m
+Let me add assertions to handle the Optional types:
+[0m← [0mEdit src/email/sender.py
+Index: /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+===================================================================
+--- /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
++++ /home/julien/Desktop/Free-Wiggum-opencode/projects/invoice-resolver-ai/src/email/sender.py
+@@ -62,10 +62,51 @@
+ if not all([self.host, self.username, self.password, self.from_email]):
+     logger.error("SMTP not configured. Cannot send email.")
+     return False
+ 
++# At this point, mypy should know these are not None due to the check above
++assert self.host is not None
++assert self.username is not None
++assert self.password is not None
++assert self.from_email is not None
++
+ try:
+     msg = MIMEMultipart("alternative")
++    msg["From"] = self.from_email
++    msg["To"] = to_email
++    msg["Subject"] = subject
++
++    if headers:
++        for key, value in headers.items():
++            msg[key] = value
++
++    # Attach text part first (email clients show first part they support)
++    if text_body:
++        msg.attach(MIMEText(text_body, "plain", "utf-8"))
++    else:
++        # If no text body provided, create a simple one from HTML
++        import re
++
++        text_only = re.sub(r"<[^>]+>", "", html_body)
++        msg.attach(MIMEText(text_only, "plain", "utf-8"))
++
++    # Attach HTML part
++    msg.attach(MIMEText(html_body, "html", "utf-8"))
++
++    with smtplib.SMTP(self.host, self.port) as server:
++        server.starttls()
++        server.login(self.username, self.password)
++        server.send_message(msg)
++
++    logger.info(f"Email sent successfully to {to_email}")
++    return True
++
++except Exception as e:
++    logger.error(f"Failed to send email to {to_email}: {e}")
++    return False
++
++try:
++    msg = MIMEMultipart("alternative")
+     msg["From"] = str(self.from_email)
+     msg["To"] = to_email
+     msg["Subject"] = subject
+ 
+
+[0m
+[0m← [0mWrite src/email/templates/follow_up_7_day.html
+Wrote file successfully.
+[0m
+Now let me create the other two follow-up templates:
+[0m← [0mWrite src/email/templates/follow_up_14_day.html
+Wrote file successfully.
 [0m
 ```
 
@@ -902,23 +727,23 @@ Perfect! Task 1.2 is complete. Let me verify the TASKS.md update:
   - *Deliverable:* `schema.sql` with tables: users (subscription_tier, invoice_limit), invoices (status, due_date, amount, stripe_payment_intent_id, paypal_txn_id, plaid_account_id), payment_connections (provider, credentials_encrypted, user_id), templates (type, content, variables), campaigns (template_id, sent_at, opened_at, paid_after), ab_tests (variant, metric, result).
 - [x] **Task 1.2:** Initialize Python/FastAPI project structure with Poetry/pip, setup logging configuration, environment variable management (python-dotenv), and core settings module.
   - *Deliverable:* Project scaffold with `main.py`, `core/config.py`, `core/logger.py`, `requirements.txt` or `pyproject.toml` including: fastapi, uvicorn, sqlalchemy, psycopg2-binary, pydantic, python-dotenv.
-- [ ] **Task 1.3:** Setup PostgreSQL database locally (docker-compose.yml) and implement SQLAlchemy models with Alembic migrations for the schema.
+- [x] **Task 1.3:** Setup PostgreSQL database locally (docker-compose.yml) and implement SQLAlchemy models with Alembic migrations for the schema.
   - *Deliverable:* `docker-compose.yml` with PostgreSQL service, `models.py` with all SQLAlchemy models, Alembic setup with initial migration.
-- [ ] **Task 1.4:** Create comprehensive API documentation outline and define OpenAPI specs for all endpoints to be built (authentication, invoice CRUD, webhook receivers, admin endpoints).
+- [x] **Task 1.4:** Create comprehensive API documentation outline and define OpenAPI specs for all endpoints to be built (authentication, invoice CRUD, webhook receivers, admin endpoints).
   - *Deliverable:* `docs/api.md` with endpoint list, request/response schemas, authentication flow (JWT), and webhook payload examples for Stripe/PayPal.
 
 ## Phase 2: Core Backend & Data Model
-- [ ] **Task 2.1:** Implement FastAPI user authentication system with JWT tokens, password hashing (bcrypt), and subscription tier enforcement middleware (check invoice limits for freemium users).
+- [x] **Task 2.1:** Implement FastAPI user authentication system with JWT tokens, password hashing (bcrypt), and subscription tier enforcement middleware (check invoice limits for freemium users).
   - *Deliverable:* `api/auth.py` with /register, /login, /refresh endpoints, `middleware.py` with SubscriptionLimitChecker, and protected route decorator.
-- [ ] **Task 2.2:** Build invoice management endpoints: create invoice (manual import), list invoices with filters (status, due_date range), update status (mark as paid/disputed), and soft delete. Integrate with database models.
+- [x] **Task 2.2:** Build invoice management endpoints: create invoice (manual import), list invoices with filters (status, due_date range), update status (mark as paid/disputed), and soft delete. Integrate with database models.
   - *Deliverable:* `api/invoices.py` with CRUD operations, Pydantic schemas for InvoiceCreate/Update/Response, and integration tests using pytest.
-- [ ] **Task 2.3:** Implement webhook receivers for Stripe (invoice.payment_failed, charge.dispute.created) and PayPal (PAYMENT.DENIED, DISPUTE.CREATED) to automatically update invoice status in database.
+- [x] **Task 2.3:** Implement webhook receivers for Stripe (invoice.payment_failed, charge.dispute.created) and PayPal (PAYMENT.DENIED, DISPUTE.CREATED) to automatically update invoice status in database.
   - *Deliverable:* `api/webhooks.py` with signature verification for Stripe (webhook secret) and PayPal (transmission ID + secret), endpoint at /webhooks/{provider}, event handler functions that update invoice records and trigger Celery tasks.
-- [ ] **Task 2.4:** Setup Celery with Redis broker, create worker processes, and implement background task for invoice status synchronization (periodic polling as fallback if webhooks fail).
+- [x] **Task 2.4:** Setup Celery with Redis broker, create worker processes, and implement background task for invoice status synchronization (periodic polling as fallback if webhooks fail).
   - *Deliverable:* `celery_app.py` configured with Redis, `tasks/sync.py` with periodic task (every 15 min) that queries Stripe/PayPal APIs for invoice status updates, and worker startup script.
 
 ## Phase 3: Integrations & AI Features
-- [ ] **Task 3.1:** Implement payment provider integration layer: Stripe API client (stripe-python) for retrieving invoices, payment intents, and customers; PayPal API client (paypalrestsdk) for txns and disputes; Plaid integration for bank feed linking (link token creation, transactions sync).
+- [x] **Task 3.1:** Implement payment provider integration layer: Stripe API client (stripe-python) for retrieving invoices, payment intents, and customers; PayPal API client (paypalrestsdk) for txns and disputes; Plaid integration for bank feed linking (link token creation, transactions sync).
   - *Deliverable:* `integrations/stripe_client.py`, `integrations/paypal_client.py`, `integrations/plaid_client.py` with functions: connect_account, get_invoice_status, list_transactions, and error handling.
 - [ ] **Task 3.2:** Build email automation system using SendGrid or SMTP (smtplib) with template rendering (Jinja2). Create follow-up sequences: 3-day reminder, 7-day late notice, 14-day final notice before dispute.
   - *Deliverable:* `email/sender.py` with send_followup_email(invoice, template_type), `email/templates/` directory with HTML templates for each follow-up stage, and queue system using Celery for scheduled sends.
@@ -946,4 +771,4 @@ Perfect! Task 1.2 is complete. Let me verify the TASKS.md update:
   - *Deliverable:* Deployment script (`deploy.sh`) or GitHub Actions workflow, sentry config, metrics endpoint at /metrics, and runbook for backup/restore procedures.
 ```
 
-**Completed at:** Fri Mar 20 10:04:42 PM EDT 2026
+**Completed at:** Fri Mar 20 10:56:55 PM EDT 2026
