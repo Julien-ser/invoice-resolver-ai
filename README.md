@@ -178,6 +178,20 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
     - API mocking for both OpenAI and Anthropic
     - Cost calculation accuracy
     - Evidence formatting and recipient handling
+- [x] **Task 3.4**: PDF generation for dispute letters and small claims forms ✓ **COMPLETED**
+  - **PDF Generator** (`src/pdf/generator.py`) using WeasyPrint (HTML → PDF)
+  - **Two professional templates**:
+    - `dispute_letter.html`: Formal dispute letter with sender/recipient info, invoice details, evidence log, payment instructions, and legal notices
+    - `small_claims_form.html`: Court preparation packet with case summary, timeline, evidence list, damages calculation, witness information, filing instructions, and presentation tips
+  - **Template rendering**: Jinja2-based with strict variable checking to ensure all required context is provided
+  - **Flexible output**: Save to file path or return PDF bytes for S3/cloud storage upload
+  - **Customization**: Support for custom CSS, page sizes (A4, Letter), and margins
+  - **Comprehensive tests** (`tests/test_pdf.py`) with 11 passing tests:
+    - PDF generation from raw HTML
+    - Template rendering with context
+    - Error handling for missing variables/templates
+    - Custom formatting (margins, page size, CSS)
+    - Multiple generation scenarios
 
 
 ### Completed Deliverables
