@@ -214,6 +214,30 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
 
 ## Getting Started (Local Development)
 
+### Running the Dashboard
+
+The Streamlit dashboard provides a user-friendly interface for managing invoices and tracking campaigns.
+
+```bash
+# Install dashboard dependencies
+pip install streamlit streamlit-authenticator plotly pandas
+
+# Set API URL (optional, defaults to http://localhost:8000)
+export API_BASE_URL=http://localhost:8000
+
+# Run the dashboard
+streamlit run dashboard/app.py
+```
+
+Access the dashboard at http://localhost:8501. Login with credentials you created via the registration API at http://localhost:8000/api/auth/register.
+
+**Dashboard Features:**
+- **Overview**: View KPIs (total invoices, recovery rate, overdue count)
+- **Invoices**: Browse and filter invoices, update status inline
+- **Campaigns**: Track email campaign performance and A/B test results
+- **Settings**: Manage payment connections (Stripe, PayPal, Plaid)
+
+
 ### Prerequisites
 
 - Python 3.11+
