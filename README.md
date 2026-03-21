@@ -30,7 +30,7 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
 
 ## Tech Stack
 
-- **Backend**: Python 3.11+, FastAPI, PostgreSQL
+- **Backend**: Python 3.11-3.13, FastAPI, PostgreSQL (Python 3.14 not yet supported due to pydantic-core compatibility)
 - **Task Queue**: Celery + Redis
 - **AI Integration**: OpenAI GPT-4 / Anthropic Claude
 - **Payment APIs**: Stripe, PayPal REST SDK, Plaid
@@ -91,12 +91,21 @@ An intelligent AI agent that monitors Stripe/PayPal/Bank feeds, detects overdue 
   - Environment variable template (`.env.example`)
 - [ ] **Task 1.3**: PostgreSQL setup with SQLAlchemy + Alembic
 - [x] **Task 1.4**: API documentation outline
-  - Comprehensive OpenAPI specs defined
-  - Complete endpoint reference with request/response schemas
-  - Authentication flow details (JWT)
-  - Webhook payload examples (Stripe, PayPal, Plaid)
-  - Error codes, rate limiting, pagination standards
-  - Detailed API documentation in `docs/api.md`
+
+### Phase 2: Core Backend & Data Model
+
+- [x] **Task 2.1**: User authentication system with JWT tokens
+  - Implemented `/api/auth/register` endpoint for user signup
+  - Implemented `/api/auth/login` endpoint for JWT authentication (access + refresh tokens)
+  - Implemented `/api/auth/refresh` endpoint for token rotation
+  - Implemented `/api/auth/logout` endpoint to revoke refresh tokens
+  - Bcrypt password hashing with passlib
+  - JWT token generation with expiration and payload validation
+  - Refresh token storage with single-use rotation in database
+  - Subscription limit enforcement middleware for free tier users
+  - Protected route dependencies (`get_current_user`, `get_current_admin_user`)
+  - Comprehensive test suite covering registration, login, token refresh, logout
+  - Test fixtures with SQLite in-memory database for isolated tests
 
 ### Completed Deliverables
 
