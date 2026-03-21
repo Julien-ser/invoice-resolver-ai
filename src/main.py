@@ -7,6 +7,7 @@ from .api.auth import router as auth_router
 from .api.invoices import router as invoices_router
 from .api.webhooks import router as webhooks_router
 from .api.ab_testing import router as ab_testing_router
+from .api.billing import router as billing_router
 from .admin import admin_router
 from .middleware import SubscriptionLimitCheckerMiddleware
 
@@ -39,6 +40,7 @@ app.include_router(auth_router)
 app.include_router(invoices_router)
 app.include_router(webhooks_router)
 app.include_router(ab_testing_router)
+app.include_router(billing_router)
 app.include_router(admin_router)
 
 # Future routers (to be implemented in later tasks)

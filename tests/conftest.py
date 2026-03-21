@@ -13,6 +13,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
+# Set test environment variables BEFORE importing app
+# These are needed because billing module loads PLANS at import time
+os.environ.setdefault("STRIPE_API_KEY", "sk_test_123")
+os.environ.setdefault("STRIPE_PRICE_PRO", "price_pro_123")
+os.environ.setdefault("STRIPE_PRICE_FREE", "price_free_123")
+
 from src.core.config import Settings
 from src.models import Base
 from src.main import app as fastapi_app

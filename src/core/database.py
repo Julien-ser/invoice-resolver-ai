@@ -38,6 +38,10 @@ def get_session():
         session.close()
 
 
+# Alias for compatibility with code expecting get_db
+get_db = get_session
+
+
 def init_db():
     """Initialize database tables (for development/testing)."""
     from src.models import Base

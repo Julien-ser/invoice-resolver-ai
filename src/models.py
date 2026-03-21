@@ -72,6 +72,7 @@ class User(Base, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSON, default=dict)
 
     # Relationships
     payment_connections: Mapped[List["PaymentConnection"]] = relationship(

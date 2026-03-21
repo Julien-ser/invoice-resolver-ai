@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     # Stripe
     stripe_api_key: Optional[str] = None
     stripe_webhook_secret: Optional[str] = None
+    stripe_price_free: Optional[str] = None
+    stripe_price_pro: Optional[str] = None
+    stripe_price_legal_pack: Optional[str] = None
+    stripe_price_multi_currency: Optional[str] = None
 
     # PayPal
     paypal_client_id: Optional[str] = None
