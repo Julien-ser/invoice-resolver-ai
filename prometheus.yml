@@ -1,0 +1,52 @@
+---
+# Prometheus configuration for Invoice Resolver AI
+# Save as prometheus.yml and run: docker-compose -f docker-compose.prod.yml -f docker-compose.prometheus.yml up -d
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Invoice Resolver API metrics
+  - job_name: 'invoice-resolver-api'
+    static_configs:
+      - targets: ['api:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Celery worker metrics (if custom metrics endpoint added)
+  # - job_name: 'invoice-resolver-celery'
+  #   static_configs:
+  #     - targets: ['celery-worker:8080']
+
+  # PostgreSQL metrics (requires pg_exporter)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    params:
+      collect[]:
+        - database
+        - bgwriter
+        - connections
+        - replication
+        - transactions
+        - vacuum
+
+  # Redis metrics (requires redis_exporter)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # Traefik metrics (already enabled)
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8080']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+rule_files:
+  # - "alerts.yml"

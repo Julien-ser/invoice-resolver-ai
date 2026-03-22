@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Reminder - Invoice {{ invoice_number }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 3px solid #007bff; }
+        .content { padding: 20px 0; }
+        .invoice-details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .details-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .details-table td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .details-table td:first-child { font-weight: bold; width: 40%; }
+        .amount { font-size: 24px; color: #28a745; font-weight: bold; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { font-size: 12px; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        .company-name { font-size: 18px; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name">{{ user.company_name or user.full_name }}</div>
+        <div>Payment Reminder</div>
+    </div>
+
+    <div class="content">
+        <p>Hello {{ client_name }},</p>
+
+        <p>This is a friendly reminder that invoice <strong>{{ invoice_number }}</strong> for <strong>{{ amount }}</strong> is coming up soon.</p>
+
+        <div class="invoice-details">
+            <table class="details-table">
+                <tr>
+                    <td>Invoice Number</td>
+                    <td>{{ invoice_number }}</td>
+                </tr>
+                <tr>
+                    <td>Amount Due</td>
+                    <td class="amount">{{ amount }}</td>
+                </tr>
+                <tr>
+                    <td>Due Date</td>
+                    <td>{{ due_date }}</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{{ invoice.description or 'Invoice payment' }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <p>To make your payment, please click the button below:</p>
+
+        <p style="text-align: center;">
+            <a href="#" class="button">Pay Invoice Now</a>
+        </p>
+
+        <p>If you have already sent this payment, please disregard this notice. If you have any questions or need to discuss payment arrangements, feel free to reply to this email.</p>
+
+        <p>Thank you for your business!</p>
+
+        <p>Best regards,<br>
+        <strong>{{ user.full_name }}</strong><br>
+        {{ user.email }}</p>
+    </div>
+
+     <div class="footer">
+         <p>This is an automated reminder. You received this email because you have an outstanding invoice with {{ user.company_name or user.full_name }}.</p>
+         <p>If you believe this is an error, please contact us at {{ user.email }}</p>
+     </div>
+
+     <!-- Email tracking pixel -->
+     {% if tracking_pixel_url %}
+     <img src="{{ tracking_pixel_url }}" width="1" height="1" alt="" style="display:none;position:absolute;top:0;left:0;">
+     {% endif %}
+ </body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dispute Letter - Invoice #{invoice_number}</title>
+</head>
+<body>
+    <div class="header">
+        <h1>{{sender_name}}</h1>
+        <p>{{sender_address}}</p>
+        <p>{{sender_city_state_zip}}</p>
+        <p>{{sender_email}}</p>
+        <p>{{sender_phone}}</p>
+    </div>
+
+    <div class="date">
+        <strong>Date:</strong> {{ date }}
+    </div>
+
+    <div class="recipient">
+        <p><strong>To:</strong></p>
+        <p>{{ recipient_name }}</p>
+        <p>{{ recipient_address }}</p>
+        <p>{{ recipient_city_state_zip }}</p>
+    </div>
+
+    <div class="subject">
+        <h2>Re: Dispute of Invoice #{{ invoice_number }} - Amount Due: ${{ amount }}</h2>
+    </div>
+
+    <div class="content">
+        <p>Dear {{ recipient_name }},</p>
+
+        <p>I am writing regarding invoice #{{ invoice_number }} for the amount of ${{ amount }}, which was issued on {{ issue_date }} and became due on {{ due_date }}. As of today, this invoice remains unpaid despite previous attempts to resolve this matter.</p>
+
+        <h3>Invoice Details:</h3>
+        <div class="invoice-details">
+            <table>
+                <tr><th>Invoice Number</th><td>{{ invoice_number }}</td></tr>
+                <tr><th>Amount</th><td>${{ amount }} {{ currency }}</td></tr>
+                <tr><th>Issue Date</th><td>{{ issue_date }}</td></tr>
+                <tr><th>Due Date</th><td>{{ due_date }}</td></tr>
+                <tr><th>Days Overdue</th><td>{{ days_overdue }}</td></tr>
+            </table>
+        </div>
+
+        {% if evidence_list %}
+        <h3>Evidence of Communication and Service:</h3>
+        {% for evidence in evidence_list %}
+        <div class="evidence-item">
+            <strong>{{ evidence.date }}:</strong> {{ evidence.description }}
+            {% if evidence.amount is defined %}(Amount: ${{ evidence.amount }}){% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <p><em>No detailed evidence provided.</em></p>
+        {% endif %}
+
+        <h3>Summary:</h3>
+        <p>The services/products were provided in full as described in the original agreement. All attempts to resolve this matter amicably have been exhausted. The payment is now past due by {{ days_overdue }} days.</p>
+
+        <h3>Demand for Payment:</h3>
+        <p>I formally demand payment of the full amount of <strong>${{ amount }} {{ currency }}</strong> within <strong>14 days</strong> from the date of this letter. The deadline for payment is <strong>{{ deadline_date }}</strong>.</p>
+
+        <div class="payment-info">
+            <h4>Accepted Payment Methods:</h4>
+            <ul>
+                {% if payment_link %}<li>Online Payment Link: <a href="{{ payment_link }}">{{ payment_link }}</a></li>{% endif %}
+                {% if bank_details %}<li>Bank Transfer: {{ bank_details }}</li>{% endif %}
+                {% if check_address %}<li>Check/Mail: {{ check_address }}</li>{% endif %}
+            </ul>
+        </div>
+
+        <h3>Consequences of Non-Payment:</h3>
+        <p>If payment is not received by the deadline, I will be forced to pursue all available legal remedies, including but not limited to filing a claim in small claims court. Please be advised that I will seek recovery of the original amount, plus any applicable fees, costs, and interest as permitted by law.</p>
+
+        <p>I hope to resolve this matter without further action. Please contact me immediately to arrange for payment.</p>
+
+        <p>Sincerely,</p>
+
+        <p><strong>{{ sender_name }}</strong></p>
+        <p>{{ sender_title }}</p>
+    </div>
+
+    <div class="footer">
+        <p>This letter is sent without prejudice to any rights or remedies available under applicable law.</p>
+        <p>CC: {{ cc_parties }}</p>
+    </div>
+</body>
+</html>

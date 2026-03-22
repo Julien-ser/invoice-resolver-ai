@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Notice Before Dispute - Invoice {{ invoice_number }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8d7da; padding: 20px; text-align: center; border-bottom: 3px solid #dc3545; }
+        .content { padding: 20px 0; }
+        .invoice-details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .details-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .details-table td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .details-table td:first-child { font-weight: bold; width: 40%; }
+        .amount { font-size: 24px; color: #dc3545; font-weight: bold; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .warning-box { background-color: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .footer { font-size: 12px; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        .company-name { font-size: 18px; font-weight: bold; color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name">{{ user.company_name or user.full_name }}</div>
+        <div>FINAL NOTICE</div>
+    </div>
+
+    <div class="content">
+        <p>Hello {{ client_name }},</p>
+
+        <p><strong>This is your final notice</strong> regarding invoice <strong>{{ invoice_number }}</strong> for <strong>{{ amount }}</strong>.</p>
+
+        <div class="invoice-details">
+            <table class="details-table">
+                <tr>
+                    <td>Invoice Number</td>
+                    <td>{{ invoice_number }}</td>
+                </tr>
+                <tr>
+                    <td>Amount Overdue</td>
+                    <td class="amount">{{ amount }}</td>
+                </tr>
+                <tr>
+                    <td>Original Due Date</td>
+                    <td>{{ due_date }}</td>
+                </tr>
+                <tr>
+                    <td>Days Overdue</td>
+                    <td>{{ days_overdue|default(0) }} days</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>{{ invoice.description or 'Invoice payment' }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="warning-box">
+            <strong>URGENT:</strong> If payment is not received within the next 3 days, we will be forced to initiate a formal dispute process. This may result in additional fees and could affect your credit rating.
+        </div>
+
+        <p>To avoid further action, please settle this invoice immediately by clicking the button below:</p>
+
+        <p style="text-align: center;">
+            <a href="#" class="button">PAY NOW</a>
+        </p>
+
+        <p>If you have already made payment, please disregard this notice and accept our thanks. If you are unable to pay the full amount, please contact us immediately to discuss payment plan options.</p>
+
+        <p>After this final notice period, we will have no choice but to pursue legal remedies to collect this debt.</p>
+
+        <p>Regards,<br>
+        <strong>{{ user.full_name }}</strong><br>
+        {{ user.email }}</p>
+    </div>
+
+     <div class="footer">
+         <p>This is an automated final notice. You received this email because you have an outstanding overdue invoice with {{ user.company_name or user.full_name }}.</p>
+         <p>If you believe this is an error, please contact us immediately at {{ user.email }}</p>
+         <p><em>This notice serves as our final attempt to resolve this matter voluntarily before escalating to formal dispute proceedings.</em></p>
+     </div>
+
+     <!-- Email tracking pixel -->
+     {% if tracking_pixel_url %}
+     <img src="{{ tracking_pixel_url }}" width="1" height="1" alt="" style="display:none;position:absolute;top:0;left:0;">
+     {% endif %}
+ </body>
+</html>
